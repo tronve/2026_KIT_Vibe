@@ -30,14 +30,14 @@ export function ChatMessage({ message }: ChatMessageProps) {
     const diffSeconds = Math.floor(diffMs / 1000)
 
     if (diffSeconds < 60) {
-      return `${diffSeconds}s ago`
+      return `${diffSeconds}초 전`
     }
     if (diffMinutes < 60) {
-      return `${diffMinutes}m ago`
+      return `${diffMinutes}분 전`
     }
 
     const hours = Math.floor(diffMinutes / 60)
-    return `${hours}h ago`
+    return `${hours}시간 전`
   }, [message.timestamp])
 
   return (
@@ -67,14 +67,14 @@ export function ChatMessage({ message }: ChatMessageProps) {
         {/* Audio Indicator (User Messages) */}
         {!isAi && message.audioUrl && (
           <div className="mt-2 flex items-center gap-2">
-            <span className="text-xs text-emerald-300">🎤 Audio message</span>
+            <span className="text-xs text-emerald-300">🎤 오디오 메시지</span>
           </div>
         )}
 
         {/* AI Feedback (shown below user message in AI response) */}
         {isAi && message.feedback && (
           <div className="mt-3 pt-3 border-t border-cyan-400/20">
-            <p className="text-xs text-cyan-200 font-semibold">📊 Feedback:</p>
+            <p className="text-xs text-cyan-200 font-semibold">📊 피드백:</p>
             <p className="text-xs text-slate-300 mt-1">{message.feedback}</p>
           </div>
         )}

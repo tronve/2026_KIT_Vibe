@@ -31,7 +31,7 @@ export function useAnalysisResult({
     queryKey: queryKeys.analysis.bySession(sessionId ?? 'pending-session'),
     queryFn: async () => {
       if (!sessionId) {
-        throw new Error('sessionId is required to fetch analysis result.')
+        throw new Error('분석 결과 조회를 위해 sessionId가 필요합니다.')
       }
 
       return getAnalysisResult(sessionId)
@@ -67,7 +67,7 @@ export function useAnalysisResult({
       return query.error.message
     }
 
-    return query.error.message || 'Failed to fetch analysis result.'
+    return query.error.message || '분석 결과를 불러오지 못했습니다.'
   }, [query.error])
 
   return {

@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 /**
  * Example: How to verify DEMO_MODE is working in your React components
  *
@@ -5,7 +6,7 @@
  */
 
 // In any React component:
-import { isDemoMode } from '@/mocks'
+import { isDemoMode } from './index'
 
 export function ExampleComponent() {
   // Check if running in DEMO_MODE
@@ -42,7 +43,7 @@ export function AppHeader() {
 
 // Example: Test API calls are working with mocks
 export function VerifyMockSetup() {
-  React.useEffect(() => {
+  useEffect(() => {
     if (isDemoMode()) {
       console.log('✅ DEMO_MODE is enabled')
       console.log('Mock data will be used instead of real APIs')

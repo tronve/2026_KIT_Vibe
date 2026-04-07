@@ -6,7 +6,7 @@ import axios, {
 } from 'axios'
 import { isDemoMode, mockApiRequest } from '../mocks'
 
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '/api/v1'
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000/api/v1'
 
 export interface ApiError extends Error {
   name: 'ApiError'
@@ -68,7 +68,6 @@ const normalizeApiError = (error: unknown): ApiError => {
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 20_000,
 })
 
 apiClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {

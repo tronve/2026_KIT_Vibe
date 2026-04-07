@@ -1,17 +1,17 @@
 import { useMemo, useState } from 'react'
 import { useMutation, type UseMutationResult } from '@tanstack/react-query'
-import { uploadPresentationVideo } from '../api/analysis'
+import { uploadPresentationVideo, type AnalysisUploadInput } from '../api/analysis'
 import { isApiError, type ApiError } from '../api/client'
 import type { PresentationAnalyzeResponse } from '../types'
 
 export type AnalysisUploadStatus = 'idle' | 'uploading' | 'success' | 'error'
 
 export interface UseAnalysisUploadResult {
-  upload: (file: File) => Promise<PresentationAnalyzeResponse>
+  upload: (input: AnalysisUploadInput) => Promise<PresentationAnalyzeResponse>
   uploadAsync: UseMutationResult<
     PresentationAnalyzeResponse,
     ApiError | Error,
-    File
+    AnalysisUploadInput
   >['mutateAsync']
   reset: () => void
   data: PresentationAnalyzeResponse | undefined
@@ -28,9 +28,9 @@ export interface UseAnalysisUploadResult {
 export function useAnalysisUpload(): UseAnalysisUploadResult {
   const [uploadProgress, setUploadProgress] = useState(0)
 
-  const mutation = useMutation<PresentationAnalyzeResponse, ApiError | Error, File>({
-    mutationFn: (file) =>
-      uploadPresentationVideo(file, {
+  const mutation = useMutation<PresentationAnalyzeResponse, ApiError | Error, AnalysisUploadInput>({
+    mutationFn: (input) =>
+      uploadPresentationVideo(input, {
         onUploadProgress: (progress) => {
           setUploadProgress(progress)
         },
@@ -64,7 +64,7 @@ export function useAnalysisUpload(): UseAnalysisUploadResult {
       return mutation.error.message
     }
 
-    return mutation.error.message || 'Upload failed. Please try again.'
+    return mutation.error.message || '업로드에 실패했습니다. 다시 시도해 주세요.'
   }, [mutation.error])
 
   const reset = () => {

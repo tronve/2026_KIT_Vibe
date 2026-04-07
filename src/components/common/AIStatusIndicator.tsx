@@ -24,7 +24,7 @@ export function AIStatusIndicator({ status, message }: AIStatusIndicatorProps) {
       case 'analyzing':
         return {
           icon: '📹',
-          label: 'Analyzing presentation',
+          label: '발표 분석 중',
           color: 'from-cyan-500 to-blue-500',
           textColor: 'text-cyan-200',
           bgColor: 'bg-cyan-500/10 border-cyan-400/30',
@@ -33,7 +33,7 @@ export function AIStatusIndicator({ status, message }: AIStatusIndicatorProps) {
       case 'generating':
         return {
           icon: '✨',
-          label: 'Generating AI question',
+          label: 'AI 질문 생성 중',
           color: 'from-purple-500 to-pink-500',
           textColor: 'text-purple-200',
           bgColor: 'bg-purple-500/10 border-purple-400/30',
@@ -42,7 +42,7 @@ export function AIStatusIndicator({ status, message }: AIStatusIndicatorProps) {
       case 'thinking':
         return {
           icon: '🧠',
-          label: 'AI is thinking',
+          label: 'AI 사고 중',
           color: 'from-amber-500 to-orange-500',
           textColor: 'text-amber-200',
           bgColor: 'bg-amber-500/10 border-amber-400/30',
@@ -51,7 +51,7 @@ export function AIStatusIndicator({ status, message }: AIStatusIndicatorProps) {
       case 'preparing':
         return {
           icon: '📊',
-          label: 'Preparing report',
+          label: '리포트 준비 중',
           color: 'from-emerald-500 to-teal-500',
           textColor: 'text-emerald-200',
           bgColor: 'bg-emerald-500/10 border-emerald-400/30',

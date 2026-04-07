@@ -23,7 +23,7 @@ export function FeedbackSection({
       </p>
 
       <div className="grid gap-4 md:grid-cols-2">
-        {(items.length > 0 ? items : ['No feedback available yet.']).map((item, index) => (
+        {(items.length > 0 ? items : ['아직 피드백 데이터가 없습니다.']).map((item, index) => (
           <article
             key={`${variant}-${index}`}
             className={`rounded-2xl border p-4 ${
@@ -35,7 +35,7 @@ export function FeedbackSection({
             <div className="mb-2 flex items-center gap-2">
               <span>{isStrength ? '✅' : '⚠️'}</span>
               <p className={`text-xs font-semibold uppercase tracking-[0.2em] ${isStrength ? 'text-emerald-200' : 'text-amber-200'}`}>
-                {isStrength ? 'Strength' : 'Watchout'} {index + 1}
+                {isStrength ? '강점' : '주의'} {index + 1}
               </p>
             </div>
             <p className="text-sm leading-6 text-slate-100">{item}</p>

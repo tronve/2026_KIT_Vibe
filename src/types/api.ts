@@ -2,7 +2,8 @@
 
 // 1) POST /api/v1/presentation/analyze
 export interface PresentationAnalyzeRequest {
-  video_file: File
+  video_file?: File
+  ppt_recording_video_file?: File
 }
 
 export interface PresentationAnalysisResult {

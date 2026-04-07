@@ -95,7 +95,7 @@ export function useRecorder(): UseRecorderResult {
       }))
 
       if (!navigator.mediaDevices?.getUserMedia) {
-        throw new Error('Audio recording is not supported in this browser.')
+        throw new Error('이 브라우저에서는 오디오 녹음을 지원하지 않습니다.')
       }
 
       const mediaStream = await navigator.mediaDevices.getUserMedia({
@@ -122,7 +122,7 @@ export function useRecorder(): UseRecorderResult {
       mediaRecorder.onerror = (event) => {
         setState((prev) => ({
           ...prev,
-          error: `Recording error: ${event.error}`,
+          error: `녹음 오류: ${event.error}`,
           isRecording: false,
           isMicrophoneActive: false,
         }))
@@ -161,7 +161,7 @@ export function useRecorder(): UseRecorderResult {
         ...prev,
         isRecording: false,
         isMicrophoneActive: false,
-        error: error instanceof Error ? error.message : 'Failed to start recording.',
+        error: error instanceof Error ? error.message : '녹음을 시작하지 못했습니다.',
       }))
       stopVisualizers()
     }

@@ -36,7 +36,7 @@ export function AISpeakingIndicator({ isPlaying, audioUrl }: AISpeakingIndicator
     <div className="flex items-center justify-center gap-2 rounded-2xl border border-cyan-400/30 bg-cyan-500/10 px-4 py-3">
       <span className="inline-flex h-3 w-3 animate-pulse rounded-full bg-cyan-400"></span>
       <p className="text-sm font-semibold text-cyan-200">
-        🎤 AI is speaking
+        🎤 AI가 말하고 있어요
         {dots.map((isActive, i) => (
           <span
             key={i}

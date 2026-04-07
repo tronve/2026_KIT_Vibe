@@ -4,16 +4,16 @@ interface ActionPlanProps {
 }
 
 export function ActionPlan({ items, animationDelayMs = 0 }: ActionPlanProps) {
-  const actionItems = items.length > 0 ? items : ['Run one additional mock interview and focus on one improvement area.']
+  const actionItems = items.length > 0 ? items : ['모의 인터뷰를 한 번 더 진행하고, 한 가지 개선 포인트에 집중해 보세요.']
 
   return (
     <section
       className="rounded-3xl border border-cyan-400/20 bg-white/5 p-6"
       style={{ animation: `reportReveal 500ms ease-out ${animationDelayMs}ms both` }}
     >
-      <p className="text-xs uppercase tracking-[0.25em] text-cyan-300">Actionable Improvement Plan</p>
+      <p className="text-xs uppercase tracking-[0.25em] text-cyan-300">실행 가능한 개선 계획</p>
       <p className="mt-2 text-sm text-slate-300">
-        Focus on these next steps to improve your next interview round.
+        다음 인터뷰를 위해 아래 실천 항목부터 순서대로 진행해 보세요.
       </p>
 
       <ol className="mt-5 space-y-3">

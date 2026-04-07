@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { useInterviewSessionData } from '../../features/ai-qa-session'
+import { useInterviewSessionData } from '../../features/ai-qa-session/hooks'
 import { ChatMessage, type ChatMessageData } from './ChatMessage'
 
 /**
@@ -32,7 +32,7 @@ export function ChatWindow() {
     builtMessages.push({
       id: 'intro',
       type: 'ai',
-      text: 'Welcome to the AI Interview Coach. I will ask you challenging questions to help you improve your presentation skills.',
+      text: 'AI 인터뷰 코치에 오신 것을 환영합니다. 발표 역량 강화를 위한 실전형 질문을 드릴게요.',
       timestamp: new Date(timestamp.getTime() - qnaHistory.length * 30000),
     })
 
@@ -57,8 +57,9 @@ export function ChatWindow() {
       })
     })
 
-    // Add current question if available
-    if (currentQuestionText && qnaHistory.length > 0) {
+    // Add current question only when it is different from the latest history question.
+    const latestHistoryQuestion = qnaHistory.length > 0 ? qnaHistory[qnaHistory.length - 1]?.q : null
+    if (currentQuestionText && qnaHistory.length > 0 && currentQuestionText !== latestHistoryQuestion) {
       const currentTimestamp = new Date()
 
       builtMessages.push({
@@ -89,7 +90,7 @@ export function ChatWindow() {
     return (
       <div className="h-full rounded-3xl border border-white/10 bg-slate-950/60 p-6 flex items-center justify-center">
         <p className="text-slate-400 text-center">
-          Start an interview session to view the conversation.
+          인터뷰 세션을 시작하면 대화 내용이 표시됩니다.
         </p>
       </div>
     )
@@ -104,7 +105,7 @@ export function ChatWindow() {
         {messages.length === 0 ? (
           <div className="h-full flex items-center justify-center">
             <p className="text-slate-400 text-center">
-              Waiting for first question...
+              첫 질문을 기다리는 중입니다...
             </p>
           </div>
         ) : (
@@ -119,7 +120,7 @@ export function ChatWindow() {
 
       {/* Message count indicator */}
       <div className="mt-4 text-center text-xs text-slate-500 border-t border-white/10 pt-4">
-        {messages.filter((m) => m.type !== 'ai' || m.id === 'intro').length} messages
+        메시지 {messages.filter((m) => m.type !== 'ai' || m.id === 'intro').length}개
       </div>
     </div>
   )

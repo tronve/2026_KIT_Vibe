@@ -65,7 +65,7 @@ export const usePresentationUploadStore = create<PresentationUploadState>((set) 
         progress: 0,
         uploadResult: null,
         analysisResult: null,
-        errorMessage: 'Only MP4 and MOV files are supported.',
+        errorMessage: 'MP4와 MOV 파일만 지원됩니다.',
       })
       return false
     }
@@ -77,7 +77,7 @@ export const usePresentationUploadStore = create<PresentationUploadState>((set) 
         progress: 0,
         uploadResult: null,
         analysisResult: null,
-        errorMessage: 'File is too large. Maximum size is 500MB.',
+        errorMessage: '파일 용량이 너무 큽니다. 최대 500MB까지 업로드할 수 있습니다.',
       })
       return false
     }
@@ -98,7 +98,7 @@ export const usePresentationUploadStore = create<PresentationUploadState>((set) 
     if (!currentFile) {
       set({
         status: 'error',
-        errorMessage: 'Please select an MP4 or MOV file before starting upload.',
+        errorMessage: '업로드를 시작하기 전에 MP4 또는 MOV 파일을 선택해 주세요.',
       })
       return
     }
@@ -131,7 +131,7 @@ export const usePresentationUploadStore = create<PresentationUploadState>((set) 
     } catch {
       set({
         status: 'error',
-        errorMessage: 'Upload workflow failed. Please retry.',
+        errorMessage: '업로드 처리 중 오류가 발생했습니다. 다시 시도해 주세요.',
       })
     }
   },

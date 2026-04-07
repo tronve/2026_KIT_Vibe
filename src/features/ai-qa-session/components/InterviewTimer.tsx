@@ -61,7 +61,7 @@ export function InterviewTimer({
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-300">
-          ⏱️ Answer Timer
+          ⏱️ 답변 타이머
         </p>
         <span
           className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ${
@@ -69,13 +69,13 @@ export function InterviewTimer({
           }`}
         >
           <span className={`h-2 w-2 rounded-full ${indicator}`}></span>
-          {isActive ? 'Recording' : 'Waiting'}
+          {isActive ? '녹음 중' : '대기 중'}
         </span>
       </div>
 
       <div className={`rounded-3xl border ${bgColor} p-6 transition-colors`}>
         <div className="text-center">
-          <p className="text-xs text-slate-400">Time remaining</p>
+          <p className="text-xs text-slate-400">남은 시간</p>
           <p className={`mt-2 text-5xl font-black ${textColor} font-mono`}>
             {formatTime(remainingSeconds)}
           </p>

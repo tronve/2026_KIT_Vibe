@@ -67,12 +67,12 @@ export function AiProcessingLoadingScreen({
     [displayProgress, stages.length, status],
   )
 
-  const message = friendlyMessages[messageIndex] ?? 'AI is analyzing your presentation...'
+  const message = friendlyMessages[messageIndex] ?? 'AI가 발표를 분석하고 있습니다...'
 
   return (
     <div className="space-y-4 rounded-3xl border border-cyan-400/25 bg-gradient-to-br from-cyan-400/10 to-slate-900/70 p-5">
       <div className="flex items-center justify-between gap-4">
-        <p className="text-xs uppercase tracking-[0.25em] text-cyan-300">AI processing</p>
+        <p className="text-xs uppercase tracking-[0.25em] text-cyan-300">AI 처리 진행 중</p>
         <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
           {displayProgress}%
         </span>

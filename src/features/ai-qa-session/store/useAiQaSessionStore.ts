@@ -46,7 +46,7 @@ const initialTranscriptItems: TranscriptItem[] = [
   {
     id: 'intro-1',
     speaker: 'ai',
-    message: 'Welcome. We will run a focused 2-minute interview rehearsal.',
+    message: '환영합니다. 2분 집중 모의 인터뷰를 시작하겠습니다.',
     createdAtIso: new Date().toISOString(),
     secondMark: 0,
   },

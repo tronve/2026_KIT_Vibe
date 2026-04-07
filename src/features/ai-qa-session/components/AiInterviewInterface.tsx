@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useSendAnswerMutation, useStartQASessionMutation } from '../../../api'
 import { AIThinking, Button, Card, ChatWindow, ErrorRecovery } from '../../../components'
 import { useRecorder } from '../../../hooks'
@@ -24,20 +24,23 @@ const indicatorStyles: Record<InterviewSpeaker, string> = {
 }
 
 export function AiInterviewInterface() {
+  const navigate = useNavigate()
   const [searchParams] = useSearchParams()
 
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const phaseSwitchTimeoutRef = useRef<number | null>(null)
   const audioElementRef = useRef<HTMLAudioElement | null>(null)
 
-  const { setAiStatus, clearAiStatus } = useAppStore()
+  const setAiStatus = useAppStore((state) => state.setAiStatus)
+  const clearAiStatus = useAppStore((state) => state.clearAiStatus)
+  const persistedSessionId = useAppStore((state) => state.sessionId)
 
   const phase = useInterviewPhase()
   const { questionRemainingSeconds, tickQuestionTimer, resetQuestionTimer } = useInterviewCountdown()
   const { activeSpeaker, microphoneEnabled } = useInterviewIndicators()
   const { appendTranscript } = useInterviewTranscript()
-  const { sessionId, currentQuestionText, answerDraft, recordedAudioBlob, isRecordingAudio, qnaHistory } = useInterviewSessionData()
-  const { recordedAudioBlob: _, isRecordingAudio: __, setRecordedAudioBlob, setIsRecordingAudio } = useInterviewAudioRecording()
+  const { sessionId: qaSessionId, currentQuestionText, answerDraft, recordedAudioBlob, isRecordingAudio, qnaHistory } = useInterviewSessionData()
+  const { setRecordedAudioBlob, setIsRecordingAudio } = useInterviewAudioRecording()
   const { isAiAudioPlaying, isTypingAnimationComplete, setIsAiAudioPlaying, setIsTypingAnimationComplete } = useAiSpeakingPhase()
 
   const {
@@ -66,13 +69,17 @@ export function AiInterviewInterface() {
   const [flowError, setFlowError] = useState<string | null>(null)
 
   const routeSessionId = searchParams.get('sessionId')
-  const effectiveSessionId = routeSessionId ?? sessionId
+  const effectiveSessionId = routeSessionId ?? qaSessionId ?? persistedSessionId
 
   const recordingTimeLabel = useMemo(() => {
     const minutes = Math.floor(recorderState.durationSeconds / 60)
     const seconds = recorderState.durationSeconds % 60
     return `${minutes}:${seconds.toString().padStart(2, '0')}`
   }, [recorderState.durationSeconds])
+
+  const handleTypingComplete = useCallback(() => {
+    setIsTypingAnimationComplete(true)
+  }, [setIsTypingAnimationComplete])
 
   const setNextQuestion = useCallback(
     (questionText: string, questionAudio: string) => {
@@ -112,15 +119,53 @@ export function AiInterviewInterface() {
 
   const sessionStatusLabel = useMemo(() => {
     if (phase === 'waiting') {
-      return 'Ready to start'
+      return '인터뷰 시작 대기 중'
+    }
+
+    if (phase === 'ai-speaking') {
+      return 'AI가 질문 중'
+    }
+
+    if (phase === 'user-answering') {
+      return recorderState.isRecording ? '답변 녹음 중' : '답변 준비 단계'
+    }
+
+    if (phase === 'evaluating') {
+      return '답변 평가 중'
     }
 
     if (phase === 'feedback-ready') {
-      return 'Feedback ready'
+      return '인터뷰 종료, 리포트 이동 가능'
     }
 
-    return 'Live interview in progress'
-  }, [phase])
+    return '인터뷰 진행 중'
+  }, [phase, recorderState.isRecording])
+
+  const phaseDescription = useMemo(() => {
+    if (phase === 'waiting') {
+      return '세션을 시작하면 첫 AI 질문이 제공됩니다.'
+    }
+
+    if (phase === 'ai-speaking') {
+      return 'AI 질문 음성과 타이핑 표시가 끝날 때까지 잠시 기다려 주세요.'
+    }
+
+    if (phase === 'user-answering') {
+      return recorderState.isRecording
+        ? '녹음이 진행 중이어서 답변 타이머가 동작 중입니다.'
+        : '아직 녹음이 시작되지 않았습니다. 녹음을 시작하면 타이머가 동작합니다.'
+    }
+
+    if (phase === 'evaluating') {
+      return 'AI가 답변을 검토하고 다음 꼬리질문을 준비하고 있습니다.'
+    }
+
+    if (phase === 'feedback-ready') {
+      return '세션을 종료하고 최종 리포트로 이동할 수 있습니다.'
+    }
+
+    return '인터뷰 상태를 업데이트하고 있습니다.'
+  }, [phase, recorderState.isRecording])
 
   useEffect(() => {
     if (routeSessionId) {
@@ -134,7 +179,7 @@ export function AiInterviewInterface() {
 
     const setupCamera = async () => {
       if (!navigator.mediaDevices?.getUserMedia) {
-        setCameraError('Webcam preview is not supported in this browser.')
+        setCameraError('이 브라우저에서는 웹캠 미리보기를 지원하지 않습니다.')
         return
       }
 
@@ -149,7 +194,7 @@ export function AiInterviewInterface() {
           videoElement.srcObject = mediaStream
         }
       } catch {
-        setCameraError('Camera access denied. Showing preview placeholder.')
+        setCameraError('카메라 권한이 거부되어 미리보기 대신 안내 화면을 표시합니다.')
       }
     }
 
@@ -174,12 +219,17 @@ export function AiInterviewInterface() {
 
   const handleStartSession = useCallback(async () => {
     if (!effectiveSessionId) {
-      setFlowError('sessionId is required. Start from presentation analysis first.')
+      setFlowError('sessionId가 필요합니다. 먼저 발표 분석 단계에서 시작해 주세요.')
       return
     }
 
+    // Ensure QA store is bound to the active session when entering from sidebar without query params.
+    if (qaSessionId !== effectiveSessionId) {
+      initializeSession(effectiveSessionId)
+    }
+
     setFlowError(null)
-    setAiStatus('generating', 'Creating your first challenge question...')
+    setAiStatus('generating', '첫 질문을 생성하고 있습니다...')
 
     try {
       const response = await startQASessionMutation.mutateAsync(effectiveSessionId)
@@ -187,19 +237,27 @@ export function AiInterviewInterface() {
       setNextQuestion(response.ai_question_text, response.ai_question_audio)
     } catch (error) {
       clearAiStatus()
-      setFlowError(error instanceof Error ? error.message : 'Failed to start Q&A session.')
+      setFlowError(error instanceof Error ? error.message : 'Q&A 세션 시작에 실패했습니다.')
     }
-  }, [effectiveSessionId, setNextQuestion, startQASessionMutation, setAiStatus, clearAiStatus])
+  }, [
+    clearAiStatus,
+    effectiveSessionId,
+    initializeSession,
+    qaSessionId,
+    setAiStatus,
+    setNextQuestion,
+    startQASessionMutation,
+  ])
 
   const handleSubmitAnswer = useCallback(async () => {
     if (!effectiveSessionId || !currentQuestionText) {
-      setFlowError('No active question to submit.')
+      setFlowError('제출할 활성 질문이 없습니다.')
       return
     }
 
     setFlowError(null)
     moveToEvaluating()
-    setAiStatus('thinking', 'Evaluating your response...')
+    setAiStatus('thinking', '답변을 평가하고 있습니다...')
 
     // Timer 만료/수동 제출 모두 제출 직전 녹음을 먼저 정지해 최신 오디오를 확보한다.
     let latestBlob = recordedAudioBlob
@@ -212,8 +270,8 @@ export function AiInterviewInterface() {
     }
 
     // Use recorded audio blob if available, otherwise fallback to draft text
-    const audioBlob = latestBlob || new Blob([answerDraft.trim() || '(no spoken response)'], { type: 'audio/webm' })
-    const userAnswer = answerDraft.trim() || '(no spoken response)'
+    const audioBlob = latestBlob || new Blob([answerDraft.trim() || '(음성 답변 없음)'], { type: 'audio/webm' })
+    const userAnswer = answerDraft.trim() || '(음성 답변 없음)'
 
     appendTranscript('user', userAnswer)
     appendHistory({ q: currentQuestionText, a: userAnswer })
@@ -229,13 +287,13 @@ export function AiInterviewInterface() {
       })
 
       clearAiStatus()
-      appendTranscript('ai', `Feedback: ${response.answer_feedback}`)
+      appendTranscript('ai', `피드백: ${response.answer_feedback}`)
       setAnswerDraft('')
       setRecordedAudioBlob(null)
       setNextQuestion(response.next_ai_question_text, response.next_ai_question_audio)
     } catch (error) {
       clearAiStatus()
-      setFlowError(error instanceof Error ? error.message : 'Failed to submit answer.')
+      setFlowError(error instanceof Error ? error.message : '답변 제출에 실패했습니다.')
       moveToFeedbackReady()
     }
   }, [
@@ -260,13 +318,13 @@ export function AiInterviewInterface() {
 
   const handleRetryAnswerUpload = useCallback(async () => {
     if (!effectiveSessionId || !recordedAudioBlob || !currentQuestionText) {
-      setFlowError('No recorded audio available for retry. Please record your answer again.')
+      setFlowError('재시도할 녹음 파일이 없습니다. 답변을 다시 녹음해 주세요.')
       return
     }
 
     setFlowError(null)
     moveToEvaluating()
-    setAiStatus('thinking', 'Retrying your audio upload...')
+    setAiStatus('thinking', '오디오 업로드를 다시 시도하고 있습니다...')
 
     const previousTurn = qnaHistory.at(-1)
     const historyContext = JSON.stringify(previousTurn ? [previousTurn] : [])
@@ -279,13 +337,13 @@ export function AiInterviewInterface() {
       })
 
       clearAiStatus()
-      appendTranscript('ai', `Feedback: ${response.answer_feedback}`)
+      appendTranscript('ai', `피드백: ${response.answer_feedback}`)
       setAnswerDraft('')
       setRecordedAudioBlob(null)
       setNextQuestion(response.next_ai_question_text, response.next_ai_question_audio)
     } catch (error) {
       clearAiStatus()
-      setFlowError(error instanceof Error ? error.message : 'Audio upload retry failed.')
+      setFlowError(error instanceof Error ? error.message : '오디오 업로드 재시도에 실패했습니다.')
       moveToFeedbackReady()
     }
   }, [
@@ -312,7 +370,7 @@ export function AiInterviewInterface() {
   }, [effectiveSessionId, initializeSession])
 
   useEffect(() => {
-    if (phase !== 'user-answering') {
+    if (phase !== 'user-answering' || !recorderState.isRecording) {
       return
     }
 
@@ -333,7 +391,14 @@ export function AiInterviewInterface() {
     return () => {
       window.clearInterval(timerId)
     }
-  }, [handleSubmitAnswer, phase, questionRemainingSeconds, sendAnswerMutation.isPending, tickQuestionTimer])
+  }, [
+    handleSubmitAnswer,
+    phase,
+    questionRemainingSeconds,
+    recorderState.isRecording,
+    sendAnswerMutation.isPending,
+    tickQuestionTimer,
+  ])
 
   // Handle typing animation completion - transition to user answering
   useEffect(() => {
@@ -399,13 +464,23 @@ export function AiInterviewInterface() {
     await retryRecording()
   }, [retryRecording, setRecordedAudioBlob])
 
+  const handleEndInterview = useCallback(async () => {
+    if (recorderState.isRecording) {
+      await stopRecording()
+    }
+
+    setFlowError(null)
+    moveToFeedbackReady()
+    clearAiStatus()
+  }, [clearAiStatus, moveToFeedbackReady, recorderState.isRecording, stopRecording])
+
   return (
     <div className="space-y-6">
       <div className="space-y-3">
-        <p className="text-xs uppercase tracking-[0.3em] text-cyan-300">Real-time AI Interview</p>
-        <h2 className="text-3xl font-black text-white">Train under realistic interview pressure.</h2>
+        <p className="text-xs uppercase tracking-[0.3em] text-cyan-300">실시간 AI 인터뷰</p>
+        <h2 className="text-3xl font-black text-white">실전 압박 상황으로 인터뷰를 훈련하세요.</h2>
         <p className="max-w-3xl text-sm leading-7 text-slate-300">
-          Start from a valid analysis session and continue AI question-answer turns with per-question timing.
+          분석이 완료된 세션에서 시작해, 질문별 제한 시간 기반으로 AI 모의 인터뷰를 진행합니다.
         </p>
       </div>
 
@@ -439,9 +514,10 @@ export function AiInterviewInterface() {
         <div className="space-y-6">
            <Card className="space-y-4">
              <div className="flex items-center justify-between gap-4">
-               <h3 className="text-lg font-semibold text-white">AI Interview Experience</h3>
+               <h3 className="text-lg font-semibold text-white">AI 인터뷰 진행 화면</h3>
                <span className="text-sm font-semibold text-cyan-300">{sessionStatusLabel}</span>
              </div>
+             <p className="text-sm leading-6 text-slate-300">{phaseDescription}</p>
 
              {/* AI Speaking Indicator */}
              <AISpeakingIndicator isPlaying={isAiAudioPlaying} />
@@ -452,7 +528,7 @@ export function AiInterviewInterface() {
                  text={currentQuestionText}
                  isActive={phase === 'ai-speaking'}
                  speed={30}
-                 onComplete={() => setIsTypingAnimationComplete(true)}
+                  onComplete={handleTypingComplete}
                />
              )}
 
@@ -461,7 +537,7 @@ export function AiInterviewInterface() {
                currentQuestionText && (
                  <div className="space-y-3">
                    <p className="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-300">
-                     💭 Question
+                      💭 질문
                    </p>
                    <div className="min-h-16 rounded-2xl border border-cyan-400/20 bg-cyan-500/5 p-4">
                      <p className="text-base leading-7 text-slate-100">{currentQuestionText}</p>
@@ -475,14 +551,14 @@ export function AiInterviewInterface() {
                  <div className="mx-auto grid h-40 w-40 place-items-center rounded-full border-2 border-cyan-300/50 bg-slate-900/70">
                    <span className="animate-pulse text-5xl">🤖</span>
                  </div>
-                 <p className="mt-4 text-center text-sm text-slate-300">AI is asking your question...</p>
+                  <p className="mt-4 text-center text-sm text-slate-300">AI가 질문을 전달하고 있습니다...</p>
                </div>
              )}
            </Card>
 
           <Card className="space-y-4">
             <div className="flex items-center justify-between gap-4">
-              <h3 className="text-lg font-semibold text-white">User Webcam Preview</h3>
+              <h3 className="text-lg font-semibold text-white">사용자 웹캠 미리보기</h3>
               <span
                 className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ${
                   microphoneEnabled ? 'bg-emerald-400/20 text-emerald-200' : 'bg-rose-500/20 text-rose-200'
@@ -493,7 +569,7 @@ export function AiInterviewInterface() {
                     microphoneEnabled && activeSpeaker === 'user' ? indicatorStyles.user : indicatorStyles.none
                   }`}
                 />
-                {microphoneEnabled ? 'Mic on' : 'Mic muted'}
+                {microphoneEnabled ? '마이크 켜짐' : '마이크 꺼짐'}
               </span>
               <span
                 className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ${
@@ -507,7 +583,7 @@ export function AiInterviewInterface() {
                     recorderState.isMicrophoneActive ? 'bg-cyan-400 animate-pulse' : 'bg-slate-500'
                   }`}
                 />
-                {recorderState.isMicrophoneActive ? 'Mic active' : 'Mic idle'}
+                {recorderState.isMicrophoneActive ? '마이크 입력 감지' : '마이크 대기'}
               </span>
             </div>
 
@@ -521,21 +597,21 @@ export function AiInterviewInterface() {
 
              <div className="flex flex-wrap gap-3">
                <Button onClick={toggleMicrophone} variant={microphoneEnabled ? 'secondary' : 'primary'} disabled={isAiAudioPlaying}>
-                 {microphoneEnabled ? 'Mute microphone' : 'Unmute microphone'}
+                 {microphoneEnabled ? '마이크 음소거' : '마이크 음소거 해제'}
                </Button>
                <Button
                  onClick={handleRecordingStart}
                  variant={recorderState.isRecording ? 'primary' : 'secondary'}
                  disabled={!microphoneEnabled || phase !== 'user-answering' || recordedAudioBlob !== null || isAiAudioPlaying}
                >
-                 {recorderState.isRecording ? '🔴 Recording...' : 'Start recording'}
+                  {recorderState.isRecording ? '🔴 녹음 중...' : '녹음 시작'}
                </Button>
                <Button
                  onClick={handleRecordingStop}
                  variant="secondary"
                  disabled={!recorderState.isRecording || recordedAudioBlob !== null}
                >
-                 Stop recording
+                  녹음 종료
                </Button>
                {(recordedAudioBlob || recorderState.error) && (
                  <Button
@@ -543,14 +619,14 @@ export function AiInterviewInterface() {
                    variant="ghost"
                    disabled={isRecordingAudio}
                  >
-                   Retry recording
+                    다시 녹음
                  </Button>
                )}
                <Button
                  onClick={handleStartSession}
                  disabled={startQASessionMutation.isPending || !effectiveSessionId || phase !== 'waiting'}
                >
-                 {startQASessionMutation.isPending ? 'Starting...' : 'Start interview'}
+                  {startQASessionMutation.isPending ? '시작 중...' : '인터뷰 시작'}
                </Button>
                <Button
                  onClick={handleSubmitAnswer}
@@ -563,32 +639,35 @@ export function AiInterviewInterface() {
                    !recordedAudioBlob
                  }
                >
-                 {sendAnswerMutation.isPending ? 'Sending answer...' : 'Submit answer'}
+                  {sendAnswerMutation.isPending ? '답변 전송 중...' : '답변 제출'}
                </Button>
                <Button onClick={resetSession} variant="ghost">
-                 Reset
+                  초기화
                </Button>
+                <Button onClick={() => void handleEndInterview()} variant="ghost" disabled={phase === 'waiting' || phase === 'evaluating'}>
+                  인터뷰 종료
+                </Button>
              </div>
 
             <textarea
               value={answerDraft}
               onChange={(event) => setAnswerDraft(event.target.value)}
-              placeholder="Type your answer draft (used as answer content for current flow)..."
+              placeholder="답변 초안을 입력하세요 (현재 흐름에서 보조 답변 텍스트로 사용됩니다)..."
               className="min-h-24 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-3 py-3 text-sm text-slate-100 placeholder:text-slate-500 focus:border-cyan-300 focus:outline-none"
             />
 
             {recorderState.error && (
               <div className="rounded-2xl border border-rose-400/30 bg-rose-500/10 p-3 text-sm text-rose-200">
-                <p className="font-semibold">Recording Error</p>
+                <p className="font-semibold">녹음 오류</p>
                 <p>{recorderState.error}</p>
               </div>
             )}
 
             {recordedAudioBlob && (
               <div className="rounded-2xl border border-emerald-400/30 bg-emerald-500/10 p-3">
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-200">✓ Audio Recorded</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-200">✓ 녹음 파일 준비됨</p>
                 <p className="mt-1 text-sm text-emerald-100">
-                  {(recordedAudioBlob.size / 1024).toFixed(1)} KB • Ready to submit
+                  {(recordedAudioBlob.size / 1024).toFixed(1)} KB • 제출 준비 완료
                 </p>
               </div>
             )}
@@ -596,7 +675,7 @@ export function AiInterviewInterface() {
             {isRecordingAudio && !recordedAudioBlob && (
               <div className="rounded-2xl border border-cyan-400/30 bg-cyan-500/10 p-3">
                 <div className="flex items-center justify-between gap-3">
-                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-200">🎤 Recording in progress...</p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-200">🎤 녹음 진행 중...</p>
                   <span className="rounded-full bg-cyan-400/20 px-2 py-0.5 text-xs font-semibold text-cyan-100">
                     {recordingTimeLabel}
                   </span>
@@ -619,8 +698,22 @@ export function AiInterviewInterface() {
           <InterviewTimer
             remainingSeconds={questionRemainingSeconds}
             totalSeconds={30}
-            isActive={phase === 'user-answering'}
+            isActive={recorderState.isRecording}
           />
+
+          {phase === 'feedback-ready' && effectiveSessionId ? (
+            <Card className="space-y-3">
+              <p className="text-xs uppercase tracking-[0.2em] text-cyan-300">세션 완료</p>
+              <p className="text-sm text-slate-300">인터뷰가 종료되었습니다. 최종 코칭 리포트로 이동하세요.</p>
+              <Button
+                onClick={() => {
+                  navigate(`/reports?sessionId=${encodeURIComponent(effectiveSessionId)}`)
+                }}
+              >
+                최종 리포트로 이동
+              </Button>
+            </Card>
+          ) : null}
 
           {/* Chat Window - Conversational Interview Display */}
           <div className="h-[500px]">

@@ -7,12 +7,34 @@ export interface UploadPresentationVideoOptions {
   onUploadProgress?: (progress: number) => void
 }
 
+export interface AnalysisUploadInput {
+  videoFile?: File | null
+  pptRecordingVideoFile?: File | null
+}
+
 export async function uploadPresentationVideo(
-  file: File,
+  input: File | AnalysisUploadInput,
   options: UploadPresentationVideoOptions = {},
 ): Promise<PresentationAnalyzeResponse> {
+  const normalizedInput: AnalysisUploadInput =
+    input instanceof File
+      ? { videoFile: input }
+      : {
+          videoFile: input.videoFile ?? null,
+          pptRecordingVideoFile: input.pptRecordingVideoFile ?? null,
+        }
+
+  if (!normalizedInput.videoFile && !normalizedInput.pptRecordingVideoFile) {
+    throw new Error('At least one source file is required for analysis.')
+  }
+
   const formData = new FormData()
-  formData.append('video_file', file)
+  if (normalizedInput.videoFile) {
+    formData.append('video_file', normalizedInput.videoFile)
+  }
+  if (normalizedInput.pptRecordingVideoFile) {
+    formData.append('ppt_recording_video_file', normalizedInput.pptRecordingVideoFile)
+  }
 
   const response = await apiRequest<PresentationAnalyzeResponse>({
     method: 'POST',

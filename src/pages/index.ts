@@ -1,4 +1,5 @@
 export * from './AiQaSessionPage'
+export * from './AnalysisPage'
 export * from './DashboardPage'
 export * from './ReportsPage'
 export * from './HomePage'

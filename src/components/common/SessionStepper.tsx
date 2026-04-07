@@ -23,26 +23,26 @@ export function SessionStepper({ currentStep, sessionId }: SessionStepperProps) 
   const steps: StepperStep[] = [
     {
       id: 'upload',
-      label: 'Upload',
-      description: 'Add your presentation',
+      label: '업로드',
+      description: '발표 자료 업로드',
       icon: '📹',
     },
     {
       id: 'analysis',
-      label: 'Analysis',
-      description: 'AI analyzes video',
+      label: '분석',
+      description: 'AI 발표 분석',
       icon: '🔍',
     },
     {
       id: 'interview',
-      label: 'Interview',
-      description: 'Practice Q&A',
+      label: '인터뷰',
+      description: 'AI Q&A 연습',
       icon: '🎤',
     },
     {
       id: 'report',
-      label: 'Report',
-      description: 'View insights',
+      label: '리포트',
+      description: '결과 확인',
       icon: '📊',
     },
   ]
@@ -54,7 +54,7 @@ export function SessionStepper({ currentStep, sessionId }: SessionStepperProps) 
     return (
       <div className="rounded-2xl border border-slate-700/50 bg-slate-900/30 px-6 py-4">
         <p className="text-center text-sm text-slate-500">
-          Upload a presentation to begin the interview workflow
+          발표 자료를 업로드하면 인터뷰 워크플로가 시작됩니다.
         </p>
       </div>
     )
@@ -151,7 +151,7 @@ export function SessionStepper({ currentStep, sessionId }: SessionStepperProps) 
       {/* Session ID Info */}
       {sessionId && (
         <div className="text-center text-xs text-slate-500">
-          Session ID: <span className="font-mono text-slate-400">{sessionId.slice(0, 16)}...</span>
+          세션 ID: <span className="font-mono text-slate-400">{sessionId.slice(0, 16)}...</span>
         </div>
       )}
     </div>

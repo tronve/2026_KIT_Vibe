@@ -6,6 +6,7 @@ import { AppShell } from './components/layout/AppShell'
 import { queryClient } from './lib/queryClient'
 import { useAppStore } from './store'
 import { AiQaSessionPage } from './pages/AiQaSessionPage'
+import { AnalysisPage } from './pages/AnalysisPage'
 import { DashboardPage } from './pages/DashboardPage'
 import { ReportsPage } from './pages/ReportsPage'
 import { NotFoundPage } from './pages/NotFoundPage'
@@ -28,7 +29,7 @@ function AppContent() {
 
     const stepToPath: Record<string, string> = {
       upload: '/upload-training',
-      analysis: `/reports?sessionId=${encodeURIComponent(sessionId)}`,
+      analysis: `/analysis?sessionId=${encodeURIComponent(sessionId)}`,
       interview: `/ai-qa-session?sessionId=${encodeURIComponent(sessionId)}`,
       report: `/reports?sessionId=${encodeURIComponent(sessionId)}`,
     }
@@ -45,6 +46,7 @@ function AppContent() {
         <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/upload-training" element={<UploadTrainingPage />} />
+        <Route path="/analysis" element={<AnalysisPage />} />
         <Route path="/ai-qa-session" element={<AiQaSessionPage />} />
         <Route path="/reports" element={<ReportsPage />} />
         <Route path="/home" element={<Navigate to="/dashboard" replace />} />
