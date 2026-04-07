@@ -6,7 +6,7 @@ import json
 import asyncio
 import logging
 from io import BytesIO
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -60,18 +60,22 @@ class AnalysisResult(BaseModel):
     gaze_score: int
     logic_summary: str
 
+
 class AnalyzeResponse(BaseModel):
     session_id: str
     script: str
     analysis_result: AnalysisResult
 
+
 class RoleplayStartRequest(BaseModel):
     session_id: str
     script: str
 
+
 class RoleplayStartResponse(BaseModel):
     ai_question_text: str
     ai_question_audio: str
+
 
 class RoleplayTurnResponse(BaseModel):
     user_answer_stt: str
@@ -79,20 +83,24 @@ class RoleplayTurnResponse(BaseModel):
     next_ai_question_text: str
     next_ai_question_audio: str
 
+
 class QnAItem(BaseModel):
     q: str
     a: str
+
 
 class ReportGenerateRequest(BaseModel):
     session_id: str
     presentation_analysis: Dict[str, Any]
     qna_history: List[QnAItem]
 
+
 class ReportGenerateResponse(BaseModel):
     overall_score: int
     strengths: List[str]
     weaknesses: List[str]
     action_items: List[str]
+
 
 class CleanupRequest(BaseModel):
     session_id: str
@@ -121,55 +129,95 @@ def _safe_parse_json(response_text: str) -> dict:
 
 # [API 1] 발표 영상 업로드 및 체공 분석 (단방향 훈련)
 @app.post("/api/v1/presentation/analyze", response_model=AnalyzeResponse)
-async def analyze_presentation(video_file: UploadFile = File(...)):
+async def analyze_presentation(
+        video_file: Optional[UploadFile] = File(default=None),
+        ppt_recording_video_file: Optional[UploadFile] = File(default=None),
+):
+    if not any([video_file, ppt_recording_video_file]):
+        raise HTTPException(
+            status_code=400,
+            detail="At least one source is required: video_file or ppt_recording_video_file.",
+        )
+
     session_id = f"session_{uuid.uuid4().hex[:8]}"
     session_path = os.path.join(TEMP_DIR, session_id)
     os.makedirs(session_path, exist_ok=True)
-    
-    file_path = os.path.join(session_path, video_file.filename)
-    gemini_file = None
-    
-    try:
-        with open(file_path, "wb") as buffer:
-            shutil.copyfileobj(video_file.file, buffer)
-            
-        mime_type = video_file.content_type or "video/mp4" 
-        logger.info(f"[{session_id}] 체공 분석 시작 (MIME: {mime_type})")
 
-        gemini_file = genai.upload_file(path=file_path, mime_type=mime_type)
-        
-        # 파일 처리 대기 (Polling)
+    saved_paths: List[str] = []
+    gemini_files = []
+
+    def _save_upload(upload: UploadFile) -> str:
+        filename = upload.filename or f"upload_{uuid.uuid4().hex[:6]}"
+        path = os.path.join(session_path, filename)
+        with open(path, "wb") as buffer:
+            shutil.copyfileobj(upload.file, buffer)
+        saved_paths.append(path)
+        return path
+
+    async def _wait_until_active(uploaded_file):
         attempts = 0
         while True:
-            gemini_file = genai.get_file(gemini_file.name)
-            if gemini_file.state.name == "ACTIVE":
-                break
-            elif gemini_file.state.name == "FAILED":
-                raise Exception(f"Gemini 서버 파일 처리 실패 (State: FAILED)")
+            latest = genai.get_file(uploaded_file.name)
+            if latest.state.name == "ACTIVE":
+                return latest
+            if latest.state.name == "FAILED":
+                raise Exception("Gemini 서버 파일 처리 실패 (State: FAILED)")
             if attempts > 20:
-                raise Exception("영상 처리 시간 초과 (100초 경과)")
-            
+                raise Exception("파일 처리 시간 초과")
             await asyncio.sleep(5)
             attempts += 1
 
-        prompt = """
-        영상을 보고 다음 정보를 추출하여 반드시 JSON으로만 응답하세요.
-        {
+    try:
+        prompt_parts = []
+
+        if video_file:
+            video_path = _save_upload(video_file)
+            video_mime = video_file.content_type or "video/mp4"
+            logger.info(f"[{session_id}] 영상 입력 분석 시작 (MIME: {video_mime})")
+            uploaded_video = genai.upload_file(path=video_path, mime_type=video_mime)
+            active_video = await _wait_until_active(uploaded_video)
+            gemini_files.append(active_video)
+            prompt_parts.append("- 발표 영상")
+
+        if ppt_recording_video_file:
+            ppt_video_path = _save_upload(ppt_recording_video_file)
+            ppt_video_mime = ppt_recording_video_file.content_type or "video/mp4"
+            logger.info(f"[{session_id}] PPT 화면 녹화 영상 분석 시작 (MIME: {ppt_video_mime})")
+            uploaded_ppt = genai.upload_file(path=ppt_video_path, mime_type=ppt_video_mime)
+            active_ppt = await _wait_until_active(uploaded_ppt)
+            gemini_files.append(active_ppt)
+            prompt_parts.append("- PPT 화면 녹화 영상")
+
+        input_summary = "\n".join(prompt_parts) if prompt_parts else "- 입력 정보 없음"
+
+        prompt = f"""
+        아래 입력 자료를 종합 분석하고 반드시 JSON으로만 응답하세요.
+
+        [입력 자료]
+        {input_summary}
+
+        분석 규칙:
+        - 영상에 포함된 실제 발화를 기준으로 스크립트, 말하기 속도(WPM), 군더더기 표현 빈도를 산출하세요.
+        - 영상이 없으면 gaze_score는 추정이 어려우므로 0으로 반환할 수 있습니다.
+        - PPT 화면 녹화 영상이 있으면 슬라이드 흐름과 발표 전달 일치도를 logic_summary 평가에 반영하세요.
+
+        응답 스키마:
+        {{
           "script": "발표자가 말한 전체 내용",
           "wpm": 130,
           "filler_words_count": 3,
           "gaze_score": 90,
           "logic_summary": "논리 구조에 대한 1문장 피드백"
-        }
+        }}
         """
-        
+
         response = model.generate_content(
-            [gemini_file, prompt],
+            [*gemini_files, prompt],
             generation_config={"response_mime_type": "application/json"}
         )
-        
+
         result_data = _safe_parse_json(response.text)
-        
+
         return AnalyzeResponse(
             session_id=session_id,
             script=result_data.get("script") or "스크립트 추출 실패",
@@ -185,11 +233,14 @@ async def analyze_presentation(video_file: UploadFile = File(...)):
         logger.error(f"[{session_id}] API 1 에러: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
     finally:
-        if gemini_file:
-            try: genai.delete_file(gemini_file.name)
-            except: pass
-        if os.path.exists(file_path):
-            os.remove(file_path)
+        for uploaded in gemini_files:
+            try:
+                genai.delete_file(uploaded.name)
+            except:
+                pass
+        for path in saved_paths:
+            if os.path.exists(path):
+                os.remove(path)
 
 
 # [API 2] 실시간 AI 롤플레잉 시작 (첫 압박 질문)
@@ -204,17 +255,17 @@ async def start_roleplay(req: RoleplayStartRequest):
         
         발표 스크립트: {req.script}
         """
-        
+
         response = model.generate_content(prompt)
         ai_question = response.text.strip()
-        
+
         # 텍스트 -> 음성(TTS) 변환 및 Base64 인코딩
         tts = gTTS(text=ai_question, lang='ko', slow=False)
         fp = BytesIO()
         tts.write_to_fp(fp)
         fp.seek(0)
         base64_audio = base64.b64encode(fp.read()).decode('utf-8')
-        
+
         return RoleplayStartResponse(
             ai_question_text=ai_question,
             ai_question_audio=base64_audio
@@ -227,25 +278,25 @@ async def start_roleplay(req: RoleplayStartRequest):
 # [API 3] 실시간 질의응답 (Q&A Ping-Pong)
 @app.post("/api/v1/roleplay/turn", response_model=RoleplayTurnResponse)
 async def roleplay_turn(
-    session_id: str = Form(...),
-    user_audio: UploadFile = File(...),
-    history_context: str = Form("[]") 
+        session_id: str = Form(...),
+        user_audio: UploadFile = File(...),
+        history_context: str = Form("[]")
 ):
     session_path = os.path.join(TEMP_DIR, session_id)
     os.makedirs(session_path, exist_ok=True)
-    
+
     audio_path = os.path.join(session_path, user_audio.filename)
     gemini_file = None
-    
+
     try:
         with open(audio_path, "wb") as buffer:
             shutil.copyfileobj(user_audio.file, buffer)
-            
+
         mime_type = user_audio.content_type or "audio/webm"
         logger.info(f"[{session_id}] Q&A 턴 분석 시작 (MIME: {mime_type})")
-        
+
         gemini_file = genai.upload_file(path=audio_path, mime_type=mime_type)
-        
+
         attempts = 0
         while True:
             gemini_file = genai.get_file(gemini_file.name)
@@ -268,39 +319,41 @@ async def roleplay_turn(
         2. "answer_feedback": 답변의 논리/설득력에 대한 짧은 피드백 (1문장)
         3. "next_ai_question_text": 이전 내용을 바탕으로 파고드는 다음 꼬리 질문 (1~2문장 구어체)
         """
-        
+
         response = model.generate_content(
             [gemini_file, prompt],
             generation_config={"response_mime_type": "application/json"}
         )
-        
+
         result_data = _safe_parse_json(response.text)
-        
+
         stt = result_data.get("user_answer_stt") or "답변을 인식하지 못했습니다."
         feedback = result_data.get("answer_feedback") or "피드백을 생성하지 못했습니다."
         next_question = result_data.get("next_ai_question_text") or "더 이상 질문할 내용이 없습니다."
-        
+
         # 다음 질문 TTS 생성
         tts = gTTS(text=next_question, lang='ko', slow=False)
         fp = BytesIO()
         tts.write_to_fp(fp)
         fp.seek(0)
         base64_audio = base64.b64encode(fp.read()).decode('utf-8')
-        
+
         return RoleplayTurnResponse(
             user_answer_stt=stt,
             answer_feedback=feedback,
             next_ai_question_text=next_question,
             next_ai_question_audio=base64_audio
         )
-        
+
     except Exception as e:
         logger.error(f"[{session_id}] API 3 에러: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
     finally:
         if gemini_file:
-            try: genai.delete_file(gemini_file.name)
-            except: pass
+            try:
+                genai.delete_file(gemini_file.name)
+            except:
+                pass
         if os.path.exists(audio_path):
             os.remove(audio_path)
 
@@ -311,10 +364,10 @@ async def generate_report(req: ReportGenerateRequest):
     try:
         logger.info(f"[{req.session_id}] 종합 리포트 생성 시작")
         presentation_data = json.dumps(req.presentation_analysis, ensure_ascii=False)
-        
+
         qna_history_str = ""
         for idx, item in enumerate(req.qna_history):
-            qna_history_str += f"\n[턴 {idx+1}] Q: {item.q}\nA: {item.a}\n"
+            qna_history_str += f"\n[턴 {idx + 1}] Q: {item.q}\nA: {item.a}\n"
 
         prompt = f"""
         당신은 상위 1% 스피치 코치입니다. 사용자의 '발표 분석'과 '실시간 Q&A 내역'을 바탕으로 최종 리포트를 JSON으로 작성하세요.
@@ -355,7 +408,7 @@ async def generate_report(req: ReportGenerateRequest):
 @app.delete("/api/v1/session/cleanup")
 async def cleanup_session(req: CleanupRequest):
     session_path = os.path.join(TEMP_DIR, req.session_id)
-    
+
     if os.path.exists(session_path):
         try:
             shutil.rmtree(session_path)
@@ -364,5 +417,5 @@ async def cleanup_session(req: CleanupRequest):
         except Exception as e:
             logger.error(f"[{req.session_id}] 파일 삭제 실패: {str(e)}")
             raise HTTPException(status_code=500, detail=str(e))
-            
+
     return {"status": "success", "message": "폴더가 이미 비워져 있습니다."}
