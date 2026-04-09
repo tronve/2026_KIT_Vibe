@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useFinalReportQuery } from '../api'
-import { ActionPlan, AIThinking, Card, ErrorRecovery, FeedbackSection, ScoreHero } from '../components'
+import { ActionPlan, AIThinking, Button, Card, ErrorRecovery, FeedbackSection, ScoreHero } from '../components'
 import { useAppStore } from '../store'
 
 // Storage key for analysis data
@@ -12,7 +12,7 @@ export function ReportsPage() {
   const [searchParams] = useSearchParams()
   const sessionId = searchParams.get('sessionId')
 
-  const { setAiStatus, clearAiStatus, setCurrentStep, setSessionId } = useAppStore()
+  const { setAiStatus, clearAiStatus, setCurrentStep, setSessionId, clearSessionFromStorage } = useAppStore()
 
   const reportQuery = useFinalReportQuery(sessionId ?? '', Boolean(sessionId))
 
@@ -48,14 +48,17 @@ export function ReportsPage() {
     clearAiStatus()
   }, [reportQuery.isFetching, reportQuery.data, setAiStatus, clearAiStatus])
 
+  const handleNewSession = async () => {
+    await clearSessionFromStorage()
+    navigate('/dashboard')
+  }
+
   if (!sessionId) {
     return (
       <Card className="space-y-3">
-        <p className="text-xs uppercase tracking-[0.3em] text-cyan-300">AI 코칭 리포트</p>
+        <p className="text-xs uppercase tracking-[0.3em] text-brand-300">AI 코칭 리포트</p>
         <h2 className="text-2xl font-black text-white">선택된 세션이 없습니다</h2>
-        <p className="text-sm leading-6 text-slate-300">
-          발표 업로드부터 시작하면 코칭 피드백 리포트를 생성할 수 있습니다.
-        </p>
+        <p className="text-sm leading-6 text-slate-300">업로드부터 시작해 주세요.</p>
       </Card>
     )
   }
@@ -89,7 +92,7 @@ export function ReportsPage() {
   if (!report) {
     return (
       <Card className="space-y-3">
-        <p className="text-xs uppercase tracking-[0.3em] text-cyan-300">AI 코칭 리포트</p>
+        <p className="text-xs uppercase tracking-[0.3em] text-brand-300">AI 코칭 리포트</p>
         <h2 className="text-2xl font-black text-white">리포트 데이터가 비어 있습니다</h2>
         <p className="text-sm leading-6 text-slate-300">리포트 API에서 코칭 데이터가 반환되지 않았습니다.</p>
       </Card>
@@ -99,11 +102,8 @@ export function ReportsPage() {
   return (
     <div className="space-y-6">
       <div className="space-y-3">
-        <p className="text-xs uppercase tracking-[0.3em] text-cyan-300">AI 코칭 리포트</p>
+        <p className="text-xs uppercase tracking-[0.3em] text-brand-300">AI 코칭 리포트</p>
         <h2 className="text-3xl font-black text-white">최종 코칭 요약</h2>
-        <p className="max-w-3xl text-sm leading-7 text-slate-300">
-          잘한 점, 압박 상황에서 흔들린 지점, 다음 연습 포인트를 한눈에 정리했습니다.
-        </p>
       </div>
 
       <ScoreHero score={report.overall_score} />
@@ -124,9 +124,9 @@ export function ReportsPage() {
 
       <ActionPlan items={report.action_items} animationDelayMs={320} />
 
-      <p className="text-xs text-slate-500">
-        출처: `/api/v1/report/generate` 응답 ({sessionId})
-      </p>
+      <div className="flex gap-2">
+        <Button onClick={handleNewSession}>새 연습 시작</Button>
+      </div>
     </div>
   )
 }

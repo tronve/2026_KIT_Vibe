@@ -41,7 +41,7 @@ const findActiveItemId = (items: VideoFeedbackItem[], currentTime: number) => {
 export function VideoFeedbackTimeline({
   videoRef,
   items,
-  title = 'Feedback Timeline',
+  title = '피드백 타임라인',
 }: VideoFeedbackTimelineProps) {
   const [currentTime, setCurrentTime] = useState(0)
 
@@ -92,7 +92,7 @@ export function VideoFeedbackTimeline({
       <div className="flex items-center justify-between">
         <h4 className="text-sm font-semibold text-white">{title}</h4>
         <span className="text-xs uppercase tracking-[0.2em] text-slate-400">
-          Current {formatTimestamp(currentTime)}
+          현재 {formatTimestamp(currentTime)}
         </span>
       </div>
 
@@ -107,12 +107,12 @@ export function VideoFeedbackTimeline({
               onClick={() => handleSeek(item.timestamp)}
               className={`w-full rounded-2xl border px-3 py-3 text-left transition ${
                 isActive
-                  ? 'border-cyan-400/30 bg-cyan-400/10'
+                  ? 'border-brand-500/30 bg-brand-500/10'
                   : 'border-white/10 bg-slate-900/40 hover:border-white/20 hover:bg-white/5'
               }`}
             >
               <div className="flex items-center justify-between gap-3">
-                <span className="font-mono text-sm font-semibold text-cyan-300">
+                <span className="font-mono text-sm font-semibold text-brand-300">
                   {formatTimestamp(item.timestamp)}
                 </span>
                 <span

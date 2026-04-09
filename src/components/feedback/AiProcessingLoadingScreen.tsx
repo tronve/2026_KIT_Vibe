@@ -70,9 +70,9 @@ export function AiProcessingLoadingScreen({
   const message = friendlyMessages[messageIndex] ?? 'AI가 발표를 분석하고 있습니다...'
 
   return (
-    <div className="space-y-4 rounded-3xl border border-cyan-400/25 bg-gradient-to-br from-cyan-400/10 to-slate-900/70 p-5">
+    <div className="space-y-4 rounded-3xl border border-brand-400/25 bg-gradient-to-br from-brand-500/10 to-slate-900/70 p-5">
       <div className="flex items-center justify-between gap-4">
-        <p className="text-xs uppercase tracking-[0.25em] text-cyan-300">AI 처리 진행 중</p>
+        <p className="text-xs uppercase tracking-[0.25em] text-brand-300">AI 처리 진행 중</p>
         <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
           {displayProgress}%
         </span>
@@ -80,7 +80,7 @@ export function AiProcessingLoadingScreen({
 
       <div className="h-2.5 overflow-hidden rounded-full bg-white/10">
         <div
-          className="h-full rounded-full bg-gradient-to-r from-cyan-300 via-blue-400 to-violet-400 transition-all duration-500"
+          className="h-full rounded-full bg-gradient-to-r from-brand-400 to-brand-500 transition-all duration-500"
           style={{ width: `${displayProgress}%` }}
         />
       </div>
@@ -98,7 +98,7 @@ export function AiProcessingLoadingScreen({
             <div key={stage.id} className="flex items-center gap-3 rounded-2xl bg-white/5 px-3 py-2">
               <span
                 className={`h-2.5 w-2.5 rounded-full ${
-                  isCompleted ? 'bg-emerald-400' : isActive ? 'animate-pulse bg-cyan-300' : 'bg-slate-600'
+                  isCompleted ? 'bg-emerald-400' : isActive ? 'animate-pulse bg-brand-300' : 'bg-slate-600'
                 }`}
               />
               <span className={`text-sm ${isCompleted || isActive ? 'text-slate-100' : 'text-slate-400'}`}>

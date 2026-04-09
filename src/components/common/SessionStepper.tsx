@@ -1,7 +1,6 @@
 interface StepperStep {
   id: 'upload' | 'analysis' | 'interview' | 'report'
   label: string
-  description: string
   icon: string
 }
 
@@ -24,25 +23,21 @@ export function SessionStepper({ currentStep, sessionId }: SessionStepperProps) 
     {
       id: 'upload',
       label: '업로드',
-      description: '발표 자료 업로드',
       icon: '📹',
     },
     {
       id: 'analysis',
       label: '분석',
-      description: 'AI 발표 분석',
       icon: '🔍',
     },
     {
       id: 'interview',
       label: '인터뷰',
-      description: 'AI Q&A 연습',
       icon: '🎤',
     },
     {
       id: 'report',
       label: '리포트',
-      description: '결과 확인',
       icon: '📊',
     },
   ]
@@ -69,7 +64,7 @@ export function SessionStepper({ currentStep, sessionId }: SessionStepperProps) 
           {/* Progress Bar */}
           <div className="absolute top-8 left-0 right-0 h-1 bg-slate-700/30 rounded-full -z-10">
             <div
-              className="h-full bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full transition-all duration-500"
+              className="h-full bg-gradient-to-r from-brand-500 to-brand-400 rounded-full transition-all duration-500"
               style={{ width: `${progressPercentage}%` }}
             />
           </div>
@@ -92,7 +87,7 @@ export function SessionStepper({ currentStep, sessionId }: SessionStepperProps) 
                       relative border-2
                       ${
                         isActive
-                          ? 'bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border-cyan-400 shadow-lg shadow-cyan-500/20 scale-110'
+                          ? 'bg-gradient-to-r from-brand-500/20 to-brand-400/20 border-brand-400 shadow-lg shadow-brand-600/20 scale-110'
                           : isPassed
                             ? 'bg-emerald-500/20 border-emerald-400'
                             : 'bg-slate-700/20 border-slate-600'
@@ -103,7 +98,7 @@ export function SessionStepper({ currentStep, sessionId }: SessionStepperProps) 
 
                     {/* Step Number Badge */}
                     {isActive && (
-                      <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-cyan-400 text-slate-950 text-xs font-bold flex items-center justify-center">
+                      <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-brand-400 text-slate-950 text-xs font-bold flex items-center justify-center">
                         {index + 1}
                       </div>
                     )}
@@ -117,7 +112,7 @@ export function SessionStepper({ currentStep, sessionId }: SessionStepperProps) 
 
                   {/* Active Indicator Ring */}
                   {isActive && (
-                    <div className="absolute inset-0 rounded-full border-2 border-cyan-400 animate-pulse" />
+                    <div className="absolute inset-0 rounded-full border-2 border-brand-400 animate-pulse" />
                   )}
                 </div>
 
@@ -126,20 +121,13 @@ export function SessionStepper({ currentStep, sessionId }: SessionStepperProps) 
                   <p
                     className={`text-sm md:text-base font-semibold transition-colors ${
                       isActive
-                        ? 'text-cyan-200'
+                        ? 'text-brand-200'
                         : isPassed
                           ? 'text-emerald-200'
                           : 'text-slate-500'
                     }`}
                   >
                     {step.label}
-                  </p>
-                  <p
-                    className={`text-xs md:text-sm transition-colors ${
-                      isActive ? 'text-cyan-300/70' : 'text-slate-600'
-                    }`}
-                  >
-                    {step.description}
                   </p>
                 </div>
               </div>

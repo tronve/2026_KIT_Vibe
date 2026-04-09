@@ -17,14 +17,14 @@ export function ScoreHero({ score }: ScoreHeroProps) {
 
   return (
     <section
-      className="rounded-3xl border border-cyan-400/20 bg-gradient-to-br from-cyan-500/15 to-slate-900 p-6"
+      className="rounded-3xl border border-brand-500/20 bg-gradient-to-br from-brand-500/15 to-slate-900 p-6"
       style={{ animation: 'reportReveal 500ms ease-out both' }}
     >
-      <p className="text-xs uppercase tracking-[0.25em] text-cyan-300">종합 점수</p>
+      <p className="text-xs uppercase tracking-[0.25em] text-brand-300">종합 점수</p>
       <div className="mt-4 flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-5xl font-black text-white">{score}</p>
-          <p className="mt-1 text-sm text-cyan-200">{levelLabel}</p>
+          <p className="mt-1 text-sm text-brand-200">{levelLabel}</p>
         </div>
         <p className="max-w-xl text-sm leading-6 text-slate-200">{tone}</p>
       </div>
@@ -36,7 +36,7 @@ export function ScoreHero({ score }: ScoreHeroProps) {
         </div>
         <div className="h-3 overflow-hidden rounded-full bg-white/10">
           <div
-            className="h-full rounded-full bg-gradient-to-r from-cyan-400 via-blue-500 to-emerald-400 transition-all duration-700"
+            className="h-full rounded-full bg-gradient-to-r from-brand-400 to-brand-500 transition-all duration-700"
             style={{ width: `${boundedScore}%` }}
           />
         </div>

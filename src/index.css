@@ -25,7 +25,7 @@
     --ui-color-muted: #94a3b8;
     --ui-color-border: rgba(148, 163, 184, 0.2);
     --ui-color-surface: rgba(15, 23, 42, 0.72);
-    --ui-color-accent: #22d3ee;
+    --ui-color-accent: #11b69a;
 
     --ui-motion-fast: 150ms;
     --ui-motion-base: 200ms;
@@ -41,7 +41,7 @@
   body {
     margin: 0;
     background:
-      radial-gradient(circle at top, rgba(59, 130, 246, 0.18), transparent 30%),
+      radial-gradient(circle at top, rgba(17, 182, 154, 0.18), transparent 30%),
       linear-gradient(180deg, #020617 0%, #0f172a 100%);
     color: var(--ui-color-text);
   }
@@ -85,7 +85,7 @@
   }
 
   ::selection {
-    background: rgba(56, 189, 248, 0.35);
+    background: rgba(17, 182, 154, 0.35);
     color: #f8fafc;
   }
 

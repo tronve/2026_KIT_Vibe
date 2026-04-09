@@ -46,7 +46,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
     >
       {/* AI Avatar */}
       {isAi && (
-        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-cyan-500/20 border border-cyan-400/30 grid place-items-center">
+        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-brand-500/20 border border-brand-400/30 grid place-items-center">
           <span className="text-sm">🤖</span>
         </div>
       )}
@@ -55,7 +55,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
       <div
         className={`max-w-[65%] rounded-3xl px-4 py-3 ${
           isAi
-            ? 'bg-cyan-500/10 border border-cyan-400/30 text-slate-100'
+            ? 'bg-brand-500/10 border border-brand-400/30 text-slate-100'
             : 'bg-emerald-500/10 border border-emerald-400/30 text-slate-100'
         }`}
       >
@@ -73,14 +73,14 @@ export function ChatMessage({ message }: ChatMessageProps) {
 
         {/* AI Feedback (shown below user message in AI response) */}
         {isAi && message.feedback && (
-          <div className="mt-3 pt-3 border-t border-cyan-400/20">
-            <p className="text-xs text-cyan-200 font-semibold">📊 피드백:</p>
+          <div className="mt-3 pt-3 border-t border-brand-400/20">
+            <p className="text-xs text-brand-200 font-semibold">📊 피드백:</p>
             <p className="text-xs text-slate-300 mt-1">{message.feedback}</p>
           </div>
         )}
 
         {/* Timestamp */}
-        <p className={`text-xs mt-2 ${isAi ? 'text-cyan-300/50' : 'text-emerald-300/50'}`}>
+        <p className={`text-xs mt-2 ${isAi ? 'text-brand-300/50' : 'text-emerald-300/50'}`}>
           {formattedTime}
         </p>
       </div>

@@ -70,9 +70,9 @@ export function AnalysisPage() {
   if (!sessionId) {
     return (
       <Card className="space-y-3">
-        <p className="text-xs uppercase tracking-[0.3em] text-cyan-300">분석</p>
+        <p className="text-xs uppercase tracking-[0.3em] text-brand-300">분석</p>
         <h2 className="text-2xl font-black text-white">선택된 세션이 없습니다</h2>
-        <p className="text-sm leading-6 text-slate-300">먼저 발표 영상 또는 PPT 녹화 영상을 업로드해 주세요.</p>
+        <p className="text-sm leading-6 text-slate-300">먼저 영상을 업로드해 주세요.</p>
       </Card>
     )
   }
@@ -96,9 +96,9 @@ export function AnalysisPage() {
   if (!analysis) {
     return (
       <Card className="space-y-3">
-        <p className="text-xs uppercase tracking-[0.3em] text-cyan-300">분석</p>
+        <p className="text-xs uppercase tracking-[0.3em] text-brand-300">분석</p>
         <h2 className="text-2xl font-black text-white">분석 결과가 아직 준비되지 않았습니다</h2>
-        <p className="text-sm leading-6 text-slate-300">업로드 단계에서 다시 분석을 실행해 주세요.</p>
+        <p className="text-sm leading-6 text-slate-300">업로드 단계에서 다시 시도해 주세요.</p>
       </Card>
     )
   }
@@ -106,11 +106,8 @@ export function AnalysisPage() {
   return (
     <div className="space-y-6">
       <div className="space-y-3">
-        <p className="text-xs uppercase tracking-[0.3em] text-cyan-300">분석</p>
+        <p className="text-xs uppercase tracking-[0.3em] text-brand-300">분석</p>
         <h2 className="text-3xl font-black text-white">발표 코칭 인사이트</h2>
-        <p className="max-w-3xl text-sm leading-7 text-slate-300">
-          분석이 완료되었습니다. 핵심 코칭 신호를 확인한 뒤 AI Q&A 또는 최종 리포트로 이동하세요.
-        </p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
@@ -133,7 +130,7 @@ export function AnalysisPage() {
 
       <div className="flex flex-wrap gap-3">
         <Link to={`/ai-qa-session?sessionId=${encodeURIComponent(sessionId)}`}>
-          <button type="button" className="inline-flex min-h-10 items-center justify-center gap-2 rounded-full bg-cyan-400 px-4 py-2 text-sm font-semibold text-slate-950">
+          <button type="button" className="inline-flex min-h-10 items-center justify-center gap-2 rounded-full bg-brand-500 px-4 py-2 text-sm font-semibold text-slate-950">
             AI Q&A 세션 시작
           </button>
         </Link>

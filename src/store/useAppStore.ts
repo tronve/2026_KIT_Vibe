@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { sessionAPI } from '../api/sessionAPI'
 
 export type AIStatus = 'analyzing' | 'generating' | 'thinking' | 'preparing' | null
 export type SessionStep = 'upload' | 'analysis' | 'interview' | 'report' | null
@@ -25,6 +26,7 @@ interface AppStore {
   // Session persistence
   restoreSessionFromStorage: () => void
   saveSessionToStorage: () => void
+  clearSessionFromStorage: () => Promise<void>
 }
 
 const SESSION_STORAGE_KEY = 'kit_vibe_session'
@@ -98,6 +100,42 @@ export const useAppStore = create<AppStore>((set, get) => ({
       window.localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify({ currentStep, sessionId }))
     } catch (error) {
       console.error('Failed to save session to storage:', error)
+    }
+  },
+
+  clearSessionFromStorage: async () => {
+    if (typeof window === 'undefined') {
+      return
+    }
+
+    try {
+      const { sessionId } = get()
+
+      // 백엔드 세션 삭제 API 호출
+      if (sessionId) {
+        try {
+          await sessionAPI.cleanup(sessionId)
+          console.log(`✅ 백엔드 세션 ${sessionId} 삭제 완료`)
+        } catch (error) {
+          console.error(`백엔드 세션 삭제 실패 (${sessionId}):`, error)
+          // API 실패해도 로컬스토리지는 삭제하도록 진행
+        }
+      }
+
+      // 로컬스토리지 정리
+      window.localStorage.removeItem(SESSION_STORAGE_KEY)
+      window.localStorage.removeItem('kit_vibe_analysis_data')
+
+      set({
+        currentStep: null,
+        sessionId: null,
+        aiStatus: null,
+        aiStatusMessage: '',
+      })
+
+      console.log('✅ 프론트엔드 세션 삭제 완료')
+    } catch (error) {
+      console.error('Failed to clear session from storage:', error)
     }
   },
 }))

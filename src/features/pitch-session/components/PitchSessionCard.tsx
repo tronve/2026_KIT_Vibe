@@ -21,7 +21,7 @@ export function PitchSessionCard() {
     <Card className="space-y-5">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-xs uppercase tracking-[0.3em] text-cyan-300">피치 세션</p>
+          <p className="text-xs uppercase tracking-[0.3em] text-brand-300">피치 세션</p>
           <h3 className="mt-2 text-2xl font-semibold text-white">{activePrompt.title}</h3>
         </div>
         <span className="rounded-full bg-white/5 px-3 py-1 text-sm text-slate-300">
@@ -40,7 +40,7 @@ export function PitchSessionCard() {
           <span>{progress}%</span>
         </div>
         <div className="h-2 overflow-hidden rounded-full bg-white/10">
-          <div className="h-full rounded-full bg-gradient-to-r from-cyan-400 to-blue-500" style={{ width: `${progress}%` }} />
+          <div className="h-full rounded-full bg-gradient-to-r from-brand-400 to-brand-500" style={{ width: `${progress}%` }} />
         </div>
       </div>
 

@@ -18,7 +18,7 @@ import type { InterviewSpeaker } from '../types'
 import { AISpeakingIndicator, QuestionTypingText, InterviewTimer } from './index'
 
 const indicatorStyles: Record<InterviewSpeaker, string> = {
-  ai: 'bg-cyan-400 shadow-glow',
+  ai: 'bg-brand-500 shadow-glow',
   user: 'bg-emerald-400 shadow-[0_0_24px_rgba(74,222,128,0.45)]',
   none: 'bg-slate-600',
 }
@@ -143,28 +143,28 @@ export function AiInterviewInterface() {
 
   const phaseDescription = useMemo(() => {
     if (phase === 'waiting') {
-      return '세션을 시작하면 첫 AI 질문이 제공됩니다.'
+      return '세션 시작을 기다리는 중입니다.'
     }
 
     if (phase === 'ai-speaking') {
-      return 'AI 질문 음성과 타이핑 표시가 끝날 때까지 잠시 기다려 주세요.'
+      return 'AI 질문 전달 중입니다.'
     }
 
     if (phase === 'user-answering') {
       return recorderState.isRecording
-        ? '녹음이 진행 중이어서 답변 타이머가 동작 중입니다.'
-        : '아직 녹음이 시작되지 않았습니다. 녹음을 시작하면 타이머가 동작합니다.'
+        ? '답변 녹음 중입니다.'
+        : '녹음을 시작하면 타이머가 시작됩니다.'
     }
 
     if (phase === 'evaluating') {
-      return 'AI가 답변을 검토하고 다음 꼬리질문을 준비하고 있습니다.'
+      return 'AI가 답변을 평가 중입니다.'
     }
 
     if (phase === 'feedback-ready') {
-      return '세션을 종료하고 최종 리포트로 이동할 수 있습니다.'
+      return '세션이 종료되었습니다.'
     }
 
-    return '인터뷰 상태를 업데이트하고 있습니다.'
+    return '상태를 동기화하는 중입니다.'
   }, [phase, recorderState.isRecording])
 
   useEffect(() => {
@@ -477,11 +477,8 @@ export function AiInterviewInterface() {
   return (
     <div className="space-y-6">
       <div className="space-y-3">
-        <p className="text-xs uppercase tracking-[0.3em] text-cyan-300">실시간 AI 인터뷰</p>
-        <h2 className="text-3xl font-black text-white">실전 압박 상황으로 인터뷰를 훈련하세요.</h2>
-        <p className="max-w-3xl text-sm leading-7 text-slate-300">
-          분석이 완료된 세션에서 시작해, 질문별 제한 시간 기반으로 AI 모의 인터뷰를 진행합니다.
-        </p>
+        <p className="text-xs uppercase tracking-[0.3em] text-brand-300">실시간 AI 인터뷰</p>
+        <h2 className="text-3xl font-black text-white">인터뷰 세션</h2>
       </div>
 
       {flowError ? (
@@ -515,7 +512,7 @@ export function AiInterviewInterface() {
            <Card className="space-y-4">
              <div className="flex items-center justify-between gap-4">
                <h3 className="text-lg font-semibold text-white">AI 인터뷰 진행 화면</h3>
-               <span className="text-sm font-semibold text-cyan-300">{sessionStatusLabel}</span>
+               <span className="text-sm font-semibold text-brand-300">{sessionStatusLabel}</span>
              </div>
              <p className="text-sm leading-6 text-slate-300">{phaseDescription}</p>
 
@@ -536,10 +533,10 @@ export function AiInterviewInterface() {
              {(phase === 'user-answering' || (phase === 'ai-speaking' && isTypingAnimationComplete)) &&
                currentQuestionText && (
                  <div className="space-y-3">
-                   <p className="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-300">
+                   <p className="text-sm font-semibold uppercase tracking-[0.2em] text-brand-300">
                       💭 질문
                    </p>
-                   <div className="min-h-16 rounded-2xl border border-cyan-400/20 bg-cyan-500/5 p-4">
+                   <div className="min-h-16 rounded-2xl border border-brand-500/20 bg-brand-500/5 p-4">
                      <p className="text-base leading-7 text-slate-100">{currentQuestionText}</p>
                    </div>
                  </div>
@@ -547,11 +544,11 @@ export function AiInterviewInterface() {
 
              {/* AI Avatar Visual */}
              {phase === 'ai-speaking' && (
-               <div className="relative overflow-hidden rounded-3xl border border-cyan-400/30 bg-gradient-to-br from-cyan-500/15 to-slate-900 p-6">
-                 <div className="mx-auto grid h-40 w-40 place-items-center rounded-full border-2 border-cyan-300/50 bg-slate-900/70">
+               <div className="relative overflow-hidden rounded-3xl border border-brand-500/30 bg-gradient-to-br from-brand-500/15 to-slate-900 p-6">
+                 <div className="mx-auto grid h-40 w-40 place-items-center rounded-full border-2 border-brand-300/50 bg-slate-900/70">
                    <span className="animate-pulse text-5xl">🤖</span>
                  </div>
-                  <p className="mt-4 text-center text-sm text-slate-300">AI가 질문을 전달하고 있습니다...</p>
+                  <p className="mt-4 text-center text-sm text-slate-300">질문 전달 중...</p>
                </div>
              )}
            </Card>
@@ -574,13 +571,13 @@ export function AiInterviewInterface() {
               <span
                 className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ${
                   recorderState.isMicrophoneActive
-                    ? 'bg-cyan-400/20 text-cyan-200'
+                    ? 'bg-brand-500/20 text-brand-200'
                     : 'bg-slate-700/40 text-slate-300'
                 }`}
               >
                 <span
                   className={`h-2.5 w-2.5 rounded-full ${
-                    recorderState.isMicrophoneActive ? 'bg-cyan-400 animate-pulse' : 'bg-slate-500'
+                    recorderState.isMicrophoneActive ? 'bg-brand-500 animate-pulse' : 'bg-slate-500'
                   }`}
                 />
                 {recorderState.isMicrophoneActive ? '마이크 입력 감지' : '마이크 대기'}
@@ -653,7 +650,7 @@ export function AiInterviewInterface() {
               value={answerDraft}
               onChange={(event) => setAnswerDraft(event.target.value)}
               placeholder="답변 초안을 입력하세요 (현재 흐름에서 보조 답변 텍스트로 사용됩니다)..."
-              className="min-h-24 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-3 py-3 text-sm text-slate-100 placeholder:text-slate-500 focus:border-cyan-300 focus:outline-none"
+              className="min-h-24 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-3 py-3 text-sm text-slate-100 placeholder:text-slate-500 focus:border-brand-300 focus:outline-none"
             />
 
             {recorderState.error && (
@@ -673,10 +670,10 @@ export function AiInterviewInterface() {
             )}
 
             {isRecordingAudio && !recordedAudioBlob && (
-              <div className="rounded-2xl border border-cyan-400/30 bg-cyan-500/10 p-3">
+              <div className="rounded-2xl border border-brand-500/30 bg-brand-500/10 p-3">
                 <div className="flex items-center justify-between gap-3">
-                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-200">🎤 녹음 진행 중...</p>
-                  <span className="rounded-full bg-cyan-400/20 px-2 py-0.5 text-xs font-semibold text-cyan-100">
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-200">🎤 녹음 진행 중...</p>
+                  <span className="rounded-full bg-brand-500/20 px-2 py-0.5 text-xs font-semibold text-brand-100">
                     {recordingTimeLabel}
                   </span>
                 </div>
@@ -684,7 +681,7 @@ export function AiInterviewInterface() {
                   {recorderState.waveformLevels.map((level, index) => (
                     <div
                       key={`wave-${index}`}
-                      className="flex-1 rounded-sm bg-cyan-300/80 transition-all duration-150"
+                      className="flex-1 rounded-sm bg-brand-300/80 transition-all duration-150"
                       style={{ height: `${Math.max(10, level)}%` }}
                     />
                   ))}
@@ -703,7 +700,7 @@ export function AiInterviewInterface() {
 
           {phase === 'feedback-ready' && effectiveSessionId ? (
             <Card className="space-y-3">
-              <p className="text-xs uppercase tracking-[0.2em] text-cyan-300">세션 완료</p>
+              <p className="text-xs uppercase tracking-[0.2em] text-brand-300">세션 완료</p>
               <p className="text-sm text-slate-300">인터뷰가 종료되었습니다. 최종 코칭 리포트로 이동하세요.</p>
               <Button
                 onClick={() => {

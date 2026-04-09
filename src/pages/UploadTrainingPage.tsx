@@ -99,7 +99,7 @@ export function UploadTrainingPage() {
   const [nextStep, setNextStep] = useState<'analysis' | 'qa'>('analysis')
   const [localError, setLocalError] = useState<string | null>(null)
 
-  const { setAiStatus, clearAiStatus, setCurrentStep, setSessionId } = useAppStore()
+  const { setAiStatus, clearAiStatus, setCurrentStep, setSessionId, clearSessionFromStorage } = useAppStore()
 
   const {
     upload,
@@ -111,6 +111,13 @@ export function UploadTrainingPage() {
     data,
     errorMessage,
   } = useAnalysisUpload()
+
+  // Clear session and reset on page load
+  useEffect(() => {
+    void (async () => {
+      await clearSessionFromStorage()
+    })()
+  }, [clearSessionFromStorage])
 
   // Update session step and ID
   useEffect(() => {
@@ -255,25 +262,21 @@ export function UploadTrainingPage() {
     <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
       <Card className="space-y-6">
         <div>
-          <p className="text-xs uppercase tracking-[0.3em] text-cyan-300">발표 업로드</p>
-          <h2 className="mt-2 text-3xl font-black text-white">AI 분석을 위해 발표 영상을 업로드하세요.</h2>
-          <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-300">
-            메인 발표 영상에 더해 PPT 화면 녹화 영상을 선택적으로 업로드할 수 있습니다. 두 영상을 함께 업로드하면
-            AI가 종합 분석하여 더 정밀한 코칭 신호를 제공합니다.
-          </p>
+          <p className="text-xs uppercase tracking-[0.3em] text-brand-300">발표 업로드</p>
+          <h2 className="mt-2 text-3xl font-black text-white">분석할 영상을 선택하세요</h2>
         </div>
 
         <div
           {...getRootProps()}
           className={`rounded-[28px] border-2 border-dashed p-8 transition ${
             isDragActive
-              ? 'border-cyan-300 bg-cyan-400/10 shadow-glow'
-              : 'border-cyan-400/30 bg-gradient-to-br from-cyan-400/5 to-transparent'
+              ? 'border-brand-300 bg-brand-500/10 shadow-glow'
+              : 'border-brand-500/30 bg-gradient-to-br from-brand-500/5 to-transparent'
           }`}
         >
           <input {...getInputProps()} />
           <div className="space-y-3 text-center">
-            <p className="text-lg font-semibold text-white">여기에 발표 영상을 드래그 앤 드롭하세요</p>
+            <p className="text-lg font-semibold text-white">여기에 발표 영상을 드래그하세요</p>
             <p className="text-sm text-slate-400">지원 형식: .mp4, .mov</p>
             <div className="pt-2">
               <Button variant="secondary" onClick={open}>
@@ -363,7 +366,7 @@ export function UploadTrainingPage() {
             </div>
             <div className="h-2 overflow-hidden rounded-full bg-white/10">
               <div
-                className="h-full rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 transition-all"
+                className="h-full rounded-full bg-gradient-to-r from-brand-400 to-brand-500 transition-all"
                 style={{ width: `${uploadProgress}%` }}
               />
             </div>
@@ -411,7 +414,7 @@ export function UploadTrainingPage() {
       </Card>
 
       <Card className="space-y-4">
-        <p className="text-xs uppercase tracking-[0.3em] text-cyan-300">AI 분석 상태</p>
+        <p className="text-xs uppercase tracking-[0.3em] text-brand-300">AI 분석 상태</p>
 
         <div className="space-y-3">
           <div className="rounded-2xl border border-white/10 bg-white/5 p-4">

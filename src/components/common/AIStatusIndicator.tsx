@@ -25,37 +25,37 @@ export function AIStatusIndicator({ status, message }: AIStatusIndicatorProps) {
         return {
           icon: '📹',
           label: '발표 분석 중',
-          color: 'from-cyan-500 to-blue-500',
-          textColor: 'text-cyan-200',
-          bgColor: 'bg-cyan-500/10 border-cyan-400/30',
-          dotColor: 'bg-cyan-400',
+          color: 'from-brand-500 to-brand-400',
+          textColor: 'text-brand-200',
+          bgColor: 'bg-brand-500/10 border-brand-400/30',
+          dotColor: 'bg-brand-400',
         }
       case 'generating':
         return {
           icon: '✨',
           label: 'AI 질문 생성 중',
-          color: 'from-purple-500 to-pink-500',
-          textColor: 'text-purple-200',
-          bgColor: 'bg-purple-500/10 border-purple-400/30',
-          dotColor: 'bg-purple-400',
+          color: 'from-brand-500 to-brand-400',
+          textColor: 'text-brand-200',
+          bgColor: 'bg-brand-500/10 border-brand-400/30',
+          dotColor: 'bg-brand-400',
         }
       case 'thinking':
         return {
           icon: '🧠',
           label: 'AI 사고 중',
-          color: 'from-amber-500 to-orange-500',
-          textColor: 'text-amber-200',
-          bgColor: 'bg-amber-500/10 border-amber-400/30',
-          dotColor: 'bg-amber-400',
+          color: 'from-brand-500 to-brand-400',
+          textColor: 'text-brand-200',
+          bgColor: 'bg-brand-500/10 border-brand-400/30',
+          dotColor: 'bg-brand-400',
         }
       case 'preparing':
         return {
           icon: '📊',
           label: '리포트 준비 중',
-          color: 'from-emerald-500 to-teal-500',
-          textColor: 'text-emerald-200',
-          bgColor: 'bg-emerald-500/10 border-emerald-400/30',
-          dotColor: 'bg-emerald-400',
+          color: 'from-brand-500 to-brand-400',
+          textColor: 'text-brand-200',
+          bgColor: 'bg-brand-500/10 border-brand-400/30',
+          dotColor: 'bg-brand-400',
         }
       default:
         return null

@@ -49,9 +49,9 @@ export function InterviewTimer({
     }
 
     return {
-      bgColor: 'bg-cyan-600/20 border-cyan-400/50',
-      textColor: 'text-cyan-200',
-      indicator: 'bg-cyan-400',
+      bgColor: 'bg-brand-600/20 border-brand-400/50',
+      textColor: 'text-brand-200',
+      indicator: 'bg-brand-500',
     }
   }, [remainingSeconds, isActive])
 
@@ -89,7 +89,7 @@ export function InterviewTimer({
                 ? 'bg-red-500'
                 : remainingSeconds <= 10
                   ? 'bg-yellow-500'
-                  : 'bg-cyan-500'
+                  : 'bg-brand-500'
             }`}
             style={{
               width: `${progress}%`,

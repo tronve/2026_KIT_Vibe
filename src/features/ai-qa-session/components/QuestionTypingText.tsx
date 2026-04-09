@@ -44,14 +44,14 @@ export function QuestionTypingText({
 
   return (
     <div className="space-y-3">
-      <p className="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-300">
+      <p className="text-sm font-semibold uppercase tracking-[0.2em] text-brand-300">
         💭 AI 질문
       </p>
-      <div className="min-h-16 rounded-2xl border border-cyan-400/20 bg-cyan-500/5 p-4">
+      <div className="min-h-16 rounded-2xl border border-brand-500/20 bg-brand-500/5 p-4">
         <p className="text-base leading-7 text-slate-100">
           {displayedText}
           {isActive && displayedText !== text && (
-            <span className="ml-1 inline-block h-5 w-1 animate-pulse bg-cyan-400"></span>
+            <span className="ml-1 inline-block h-5 w-1 animate-pulse bg-brand-500"></span>
           )}
         </p>
       </div>

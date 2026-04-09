@@ -155,11 +155,11 @@ export function InsightCard({ data }: InsightCardProps) {
       badge: 'bg-emerald-400/20 text-emerald-300',
     },
     cyan: {
-      bg: 'bg-cyan-500/10',
-      border: 'border-cyan-400/30',
-      icon: 'text-cyan-300',
-      title: 'text-cyan-200',
-      badge: 'bg-cyan-400/20 text-cyan-300',
+      bg: 'bg-brand-500/10',
+      border: 'border-brand-400/30',
+      icon: 'text-brand-300',
+      title: 'text-brand-200',
+      badge: 'bg-brand-400/20 text-brand-300',
     },
     amber: {
       bg: 'bg-amber-500/10',

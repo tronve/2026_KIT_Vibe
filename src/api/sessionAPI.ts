@@ -20,6 +20,11 @@ export interface SessionEventPayload {
   payload?: Record<string, unknown>
 }
 
+export interface CleanupSessionResponse {
+  status: string
+  message: string
+}
+
 export const sessionAPI = {
   create: (payload: CreateSessionPayload) =>
     apiRequest<CreateSessionResponse>({
@@ -39,6 +44,13 @@ export const sessionAPI = {
       method: 'POST',
       url: `/sessions/${sessionId}/events`,
       data: payload,
+    }),
+
+  cleanup: (sessionId: string) =>
+    apiRequest<CleanupSessionResponse>({
+      method: 'DELETE',
+      url: '/session/cleanup',
+      data: { session_id: sessionId },
     }),
 }
 
