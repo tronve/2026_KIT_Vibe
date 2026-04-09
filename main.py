@@ -200,6 +200,7 @@ async def analyze_presentation(
         - 영상에 포함된 실제 발화를 기준으로 스크립트, 말하기 속도(WPM), 군더더기 표현 빈도를 산출하세요.
         - 영상이 없으면 gaze_score는 추정이 어려우므로 0으로 반환할 수 있습니다.
         - PPT 화면 녹화 영상이 있으면 슬라이드 흐름과 발표 전달 일치도를 logic_summary 평가에 반영하세요.
+        - script와 logic_summary는 반드시 한국어로 작성하세요.
 
         응답 스키마:
         {{
