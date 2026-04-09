@@ -19,7 +19,7 @@ function ChatMessage({ message }: { message: ChatMessageData }) {
 
   return (
     <div className={`mb-3 flex gap-2 ${isAi ? 'justify-start' : 'justify-end'}`}>
-      <div className={`max-w-[75%] rounded-2xl px-3 py-2 text-sm ${isAi ? 'border border-brand-400/30 bg-brand-500/10 text-slate-100' : 'border border-emerald-400/30 bg-emerald-500/10 text-slate-100'}`}>
+      <div className={`max-w-[75%] rounded-lg px-3 py-2 text-sm ${isAi ? 'border border-brand-300 bg-brand-100 text-brand-900' : 'border border-emerald-300 bg-emerald-100 text-emerald-900'}`}>
         {message.text}
       </div>
     </div>
@@ -72,11 +72,11 @@ function InPageChatWindow({ sessionId }: { sessionId: string | null }) {
   }, [messages])
 
   if (!sessionId) {
-    return <p className="text-sm text-slate-400">세션을 시작하면 대화가 표시됩니다.</p>
+    return <p className="text-sm text-brand-600">세션을 시작하면 대화가 표시됩니다.</p>
   }
 
   return (
-    <div className="max-h-[320px] overflow-y-auto rounded-2xl border border-white/10 bg-slate-950/60 p-4">
+    <div className="max-h-[320px] overflow-y-auto rounded-lg border border-brand-200 bg-brand-50 p-4">
       {messages.map((message) => (
         <ChatMessage key={message.id} message={message} />
       ))}
@@ -235,10 +235,10 @@ export function AiQaSessionPage() {
   if (!effectiveSessionId) {
     return (
       <Card className="space-y-4">
-        <p className="text-xs uppercase tracking-[0.3em] text-brand-300">AI Q&A 세션</p>
-        <h2 className="text-2xl font-black text-white">세션 ID가 없습니다</h2>
-        <p className="text-sm leading-6 text-slate-300">먼저 발표 영상을 업로드해 주세요.</p>
-        <Link to="/upload-training" className="inline-flex rounded-full bg-brand-500 px-4 py-2 text-sm font-semibold text-slate-950">업로드로 이동</Link>
+        <p className="text-xs uppercase tracking-[0.3em] text-brand-600">AI Q&A 세션</p>
+        <h2 className="text-2xl font-black text-brand-900">세션 ID가 없습니다</h2>
+        <p className="text-sm leading-6 text-brand-700">먼저 발표 영상을 업로드해 주세요.</p>
+        <Link to="/upload-training" className="inline-flex rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white">업로드로 이동</Link>
       </Card>
     )
   }
@@ -246,14 +246,14 @@ export function AiQaSessionPage() {
   return (
     <Card className="space-y-5">
       <div className="space-y-2">
-        <p className="text-xs uppercase tracking-[0.3em] text-brand-300">AI Q&A 세션</p>
-        <h2 className="text-3xl font-black text-white">실시간 인터뷰</h2>
+        <p className="text-xs uppercase tracking-[0.3em] text-brand-600">AI Q&A 세션</p>
+        <h2 className="text-3xl font-black text-brand-900">실시간 인터뷰</h2>
       </div>
 
-      <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-slate-300">
-        <p>상태: <span className="font-semibold text-white">{simplePhaseLabel}</span></p>
-        <p className="mt-1">남은 시간: <span className="font-semibold text-white">{questionRemainingSeconds}s</span></p>
-        <p className="mt-1">마이크: <span className="font-semibold text-white">{recorderState.isMicrophoneActive ? '활성' : '비활성'}</span></p>
+      <div className="rounded-lg border border-brand-200 bg-brand-50 p-4 text-sm text-brand-700">
+        <p>상태: <span className="font-semibold text-brand-900">{simplePhaseLabel}</span></p>
+        <p className="mt-1">남은 시간: <span className="font-semibold text-brand-900">{questionRemainingSeconds}s</span></p>
+        <p className="mt-1">마이크: <span className="font-semibold text-brand-900">{recorderState.isMicrophoneActive ? '활성' : '비활성'}</span></p>
       </div>
 
       <div className="flex flex-wrap gap-3">
@@ -273,22 +273,22 @@ export function AiQaSessionPage() {
         </Button>
       </div>
 
-      <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-        <p className="text-xs uppercase tracking-[0.25em] text-slate-400">답변 메모</p>
+      <div className="rounded-lg border border-brand-200 bg-brand-50 p-4">
+        <p className="text-xs uppercase tracking-[0.25em] text-brand-600">답변 메모</p>
         <textarea
           value={answerDraft}
           onChange={(event) => setAnswerDraft(event.target.value)}
           rows={4}
-          className="mt-3 w-full rounded-2xl border border-white/10 bg-slate-950/50 p-3 text-sm text-slate-100 outline-none"
+          className="mt-3 w-full rounded-lg border border-brand-200 bg-white p-3 text-sm text-brand-900 outline-none"
           placeholder="음성 답변이 어려우면 메모를 입력하세요."
         />
       </div>
 
-      {localError ? <p className="rounded-2xl border border-rose-400/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">{localError}</p> : null}
+      {localError ? <p className="rounded-lg border border-rose-300 bg-rose-50 px-4 py-3 text-sm text-rose-900">{localError}</p> : null}
 
       <InPageChatWindow sessionId={effectiveSessionId} />
 
-      <p className="text-xs text-slate-500">세션 ID: {sessionId ?? '없음'}</p>
+      <p className="text-xs text-brand-500">세션 ID: {sessionId ?? '없음'}</p>
     </Card>
   )
 }

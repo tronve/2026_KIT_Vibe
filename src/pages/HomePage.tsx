@@ -41,11 +41,11 @@ export function HomePage() {
     <div className="space-y-8">
       <section className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
         <div className="space-y-6">
-          <span className="inline-flex rounded-full border border-brand-500/20 bg-brand-500/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-brand-300">
+          <span className="inline-flex rounded-full border border-brand-300 bg-brand-100 px-4 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-brand-700">
             AI Pitch Master
           </span>
           <div className="space-y-4">
-            <h1 className="max-w-2xl text-4xl font-black leading-tight text-white sm:text-5xl lg:text-6xl">
+            <h1 className="max-w-2xl text-4xl font-black leading-tight text-brand-900 sm:text-5xl lg:text-6xl">
               발표 연습을 간결하게
             </h1>
           </div>
@@ -56,7 +56,7 @@ export function HomePage() {
             </Button>
             <a
               href="#architecture"
-              className="inline-flex items-center justify-center rounded-full border border-white/10 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
+              className="inline-flex items-center justify-center rounded-lg border border-brand-300 bg-brand-50 px-5 py-3 text-sm font-semibold text-brand-900 transition hover:bg-brand-100"
             >
               아키텍처 가이드 보기
             </a>
@@ -64,8 +64,8 @@ export function HomePage() {
 
           <Card className="space-y-4">
             <div>
-              <p className="text-xs uppercase tracking-[0.25em] text-slate-400">개인화</p>
-              <h2 className="mt-2 text-2xl font-semibold text-white">{speakerName}님</h2>
+              <p className="text-xs uppercase tracking-[0.25em] text-brand-600">개인화</p>
+              <h2 className="mt-2 text-2xl font-semibold text-brand-900">{speakerName}님</h2>
             </div>
 
             <form className="flex flex-col gap-3 sm:flex-row" onSubmit={handleSaveProfile}>
@@ -73,7 +73,7 @@ export function HomePage() {
                 value={draftName}
                 onChange={(event) => setDraftName(event.target.value)}
                 placeholder="이름을 입력하세요"
-                className="min-w-0 flex-1 rounded-full border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-brand-500 focus:outline-none"
+                className="min-w-0 flex-1 rounded-lg border border-brand-200 bg-brand-50 px-4 py-3 text-sm text-brand-900 placeholder:text-brand-600 focus:border-brand-400 focus:outline-none"
               />
               <Button type="submit">저장</Button>
             </form>
@@ -88,8 +88,8 @@ export function HomePage() {
       <section id="architecture" className="grid gap-4 md:grid-cols-3">
         {highlights.map((item) => (
           <Card key={item.title} className="space-y-3">
-            <h3 className="text-lg font-semibold text-white">{item.title}</h3>
-            <p className="text-sm leading-6 text-slate-300">{item.description}</p>
+            <h3 className="text-lg font-semibold text-brand-900">{item.title}</h3>
+            <p className="text-sm leading-6 text-brand-700">{item.description}</p>
           </Card>
         ))}
       </section>

@@ -11,12 +11,12 @@ const ANALYSIS_DATA_STORAGE_KEY = 'kit_vibe_analysis_data'
 
 function AIThinking() {
   return (
-    <div className="rounded-3xl border border-brand-500/20 bg-brand-500/10 p-6">
+    <div className="rounded-lg border border-brand-300 bg-brand-50 p-6">
       <div className="flex items-center gap-3">
-        <span className="inline-flex h-3 w-3 rounded-full bg-brand-300 animate-pulse" />
-        <p className="text-sm font-semibold text-brand-100">AI 처리 중</p>
+        <span className="inline-flex h-3 w-3 rounded-full bg-brand-600 animate-pulse" />
+        <p className="text-sm font-semibold text-brand-900">AI 처리 중</p>
       </div>
-      <p className="mt-3 text-sm text-slate-200">발표를 분석하고 있습니다...</p>
+      <p className="mt-3 text-sm text-brand-700">발표를 분석하고 있습니다...</p>
     </div>
   )
 }
@@ -34,19 +34,19 @@ function UploadErrorRecovery({
 }) {
   const message = error instanceof Error ? error.message : '다시 시도해 주세요.'
   return (
-    <Card className="space-y-4 rounded-2xl border border-rose-400/30 bg-rose-500/10 p-4 text-rose-100">
+    <Card className="space-y-4 rounded-lg border border-rose-300 bg-rose-50 p-4 text-rose-900">
       <div>
-        <h3 className="text-lg font-semibold text-white">문제가 발생했습니다</h3>
-        <p className="mt-2 text-sm leading-6 text-rose-100">{message}</p>
+        <h3 className="text-lg font-semibold text-brand-900">문제가 발생했습니다</h3>
+        <p className="mt-2 text-sm leading-6 text-rose-700">{message}</p>
       </div>
       <div className="flex flex-wrap gap-2">
         {onRetry ? (
-          <button type="button" onClick={() => void onRetry()} className="rounded-full bg-brand-500 px-4 py-2 text-xs font-semibold text-slate-950">
+          <button type="button" onClick={() => void onRetry()} className="rounded-lg bg-brand-600 px-4 py-2 text-xs font-semibold text-white">
             다시 시도
           </button>
         ) : null}
         {sessionId && onRecoverSession ? (
-          <button type="button" onClick={() => void onRecoverSession()} className="rounded-full border border-white/15 px-4 py-2 text-xs font-semibold text-white">
+          <button type="button" onClick={() => void onRecoverSession()} className="rounded-lg border border-brand-200 px-4 py-2 text-xs font-semibold text-brand-900">
             세션 복구
           </button>
         ) : null}
@@ -93,21 +93,21 @@ function VideoFeedbackTimeline({ videoRef, items, title = '피드백 타임라�
   const severityStyles = { low: 'bg-emerald-400/15 text-emerald-300 ring-emerald-400/30', medium: 'bg-amber-400/15 text-amber-300 ring-amber-400/30', high: 'bg-rose-400/15 text-rose-300 ring-rose-400/30' } as const
 
   return (
-    <div className="space-y-3 rounded-3xl border border-white/10 bg-white/5 p-4">
+    <div className="space-y-3 rounded-lg border border-brand-200 bg-brand-50 p-4">
       <div className="flex items-center justify-between">
-        <h4 className="text-sm font-semibold text-white">{title}</h4>
-        <span className="text-xs uppercase tracking-[0.2em] text-slate-400">현재 {formatTimestamp(currentTime)}</span>
+        <h4 className="text-sm font-semibold text-brand-900">{title}</h4>
+        <span className="text-xs uppercase tracking-[0.2em] text-brand-600">현재 {formatTimestamp(currentTime)}</span>
       </div>
       <div className="space-y-2">
         {sortedItems.map((item) => {
           const isActive = item.id === activeItemId
           return (
-            <button key={item.id} type="button" onClick={() => handleSeek(item.timestamp)} className={`w-full rounded-2xl border px-3 py-3 text-left transition ${isActive ? 'border-brand-500/30 bg-brand-500/10' : 'border-white/10 bg-slate-900/40 hover:border-white/20 hover:bg-white/5'}`}>
+            <button key={item.id} type="button" onClick={() => handleSeek(item.timestamp)} className={`w-full rounded-lg border px-3 py-3 text-left transition ${isActive ? 'border-brand-300 bg-brand-100' : 'border-brand-200 bg-white hover:border-brand-300 hover:bg-brand-50'}`}>
               <div className="flex items-center justify-between gap-3">
-                <span className="font-mono text-sm font-semibold text-brand-300">{formatTimestamp(item.timestamp)}</span>
-                <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ring-1 ring-inset ${severityStyles[item.severity]}`}>{item.severity}</span>
+                <span className="font-mono text-sm font-semibold text-brand-700">{formatTimestamp(item.timestamp)}</span>
+                <span className={`rounded-lg px-2 py-0.5 text-xs font-semibold ring-1 ring-inset ${severityStyles[item.severity]}`}>{item.severity}</span>
               </div>
-              <p className="mt-2 text-sm leading-6 text-slate-300">{item.message}</p>
+              <p className="mt-2 text-sm leading-6 text-brand-700">{item.message}</p>
             </button>
           )
         })}
@@ -135,21 +135,21 @@ function AiProcessingLoadingScreen({ status, progress, stages, friendlyMessages 
   const message = friendlyMessages[messageIndex] ?? 'AI가 발표를 분석하고 있습니다...'
 
   return (
-    <div className="space-y-4 rounded-3xl border border-brand-400/25 bg-gradient-to-br from-brand-500/10 to-slate-900/70 p-5">
+    <div className="space-y-4 rounded-lg border border-brand-200 bg-gradient-to-br from-brand-50 to-white p-5">
       <div className="flex items-center justify-between gap-4">
-        <p className="text-xs uppercase tracking-[0.25em] text-brand-300">AI 처리 진행 중</p>
-        <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">{displayProgress}%</span>
+        <p className="text-xs uppercase tracking-[0.25em] text-brand-600">AI 처리 진행 중</p>
+        <span className="rounded-lg bg-brand-100 px-3 py-1 text-xs font-semibold text-brand-700">{displayProgress}%</span>
       </div>
-      <div className="h-2.5 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full bg-gradient-to-r from-brand-400 to-brand-500 transition-all duration-500" style={{ width: `${displayProgress}%` }} /></div>
-      <div className="rounded-2xl border border-white/10 bg-slate-950/50 p-3 text-sm text-slate-200">{message}</div>
+      <div className="h-2.5 overflow-hidden rounded-full bg-brand-200"><div className="h-full rounded-full bg-gradient-to-r from-brand-500 to-brand-600 transition-all duration-500" style={{ width: `${displayProgress}%` }} /></div>
+      <div className="rounded-lg border border-brand-200 bg-brand-50 p-3 text-sm text-brand-700">{message}</div>
       <div className="space-y-2">
         {stages.map((stage, index) => {
           const isCompleted = index < currentStageIndex
           const isActive = index === currentStageIndex
           return (
-            <div key={stage.id} className="flex items-center gap-3 rounded-2xl bg-white/5 px-3 py-2">
-              <span className={`h-2.5 w-2.5 rounded-full ${isCompleted ? 'bg-emerald-400' : isActive ? 'animate-pulse bg-brand-300' : 'bg-slate-600'}`} />
-              <span className={`text-sm ${isCompleted || isActive ? 'text-slate-100' : 'text-slate-400'}`}>{stage.label}</span>
+            <div key={stage.id} className="flex items-center gap-3 rounded-lg bg-brand-50 px-3 py-2">
+              <span className={`h-2.5 w-2.5 rounded-full ${isCompleted ? 'bg-emerald-500' : isActive ? 'animate-pulse bg-brand-600' : 'bg-brand-300'}`} />
+              <span className={`text-sm ${isCompleted || isActive ? 'text-brand-900' : 'text-brand-600'}`}>{stage.label}</span>
             </div>
           )
         })}
@@ -404,22 +404,22 @@ export function UploadTrainingPage() {
     <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
       <Card className="space-y-6">
         <div>
-          <p className="text-xs uppercase tracking-[0.3em] text-brand-300">발표 업로드</p>
-          <h2 className="mt-2 text-3xl font-black text-white">분석할 영상을 선택하세요</h2>
+          <p className="text-xs uppercase tracking-[0.3em] text-brand-600">발표 업로드</p>
+          <h2 className="mt-2 text-3xl font-black text-brand-900">분석할 영상을 선택하세요</h2>
         </div>
 
         <div
           {...getRootProps()}
-          className={`rounded-[28px] border-2 border-dashed p-8 transition ${
+          className={`rounded-lg border-2 border-dashed p-8 transition ${
             isDragActive
-              ? 'border-brand-300 bg-brand-500/10 shadow-glow'
-              : 'border-brand-500/30 bg-gradient-to-br from-brand-500/5 to-transparent'
+              ? 'border-brand-600 bg-brand-100 shadow-glow'
+              : 'border-brand-300 bg-gradient-to-br from-brand-50 to-transparent'
           }`}
         >
           <input {...getInputProps()} />
           <div className="space-y-3 text-center">
-            <p className="text-lg font-semibold text-white">여기에 발표 영상을 드래그하세요</p>
-            <p className="text-sm text-slate-400">지원 형식: .mp4, .mov</p>
+            <p className="text-lg font-semibold text-brand-900">여기에 발표 영상을 드래그하세요</p>
+            <p className="text-sm text-brand-600">지원 형식: .mp4, .mov</p>
             <div className="pt-2">
               <Button variant="secondary" onClick={open}>
                 영상 선택
@@ -429,25 +429,25 @@ export function UploadTrainingPage() {
         </div>
 
         <div className="grid gap-4 md:grid-cols-2">
-          <div className="rounded-3xl border border-white/10 bg-white/5 p-4">
-            <p className="text-xs uppercase tracking-[0.25em] text-slate-400">선택 업로드: PPT 화면 녹화 영상</p>
-            <p className="mt-2 text-sm text-slate-300">`.mp4` 또는 `.mov`</p>
+          <div className="rounded-lg border border-brand-200 bg-brand-50 p-4">
+            <p className="text-xs uppercase tracking-[0.25em] text-brand-600">선택 업로드: PPT 화면 녹화 영상</p>
+            <p className="mt-2 text-sm text-brand-700">`.mp4` 또는 `.mov`</p>
             <input
               type="file"
               accept="video/mp4,video/quicktime,.mp4,.mov"
               onChange={handlePptVideoFileChange}
-              className="mt-3 block w-full cursor-pointer text-sm text-slate-300 file:mr-3 file:rounded-full file:border-0 file:bg-slate-800 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-slate-100"
+              className="mt-3 block w-full cursor-pointer text-sm text-brand-700 file:mr-3 file:rounded-lg file:border-0 file:bg-brand-600 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-white"
             />
-            <p className="mt-2 text-xs text-slate-500">{pptVideoFile ? pptVideoFile.name : '선택된 PPT 화면 녹화 영상 없음'}</p>
+            <p className="mt-2 text-xs text-brand-500">{pptVideoFile ? pptVideoFile.name : '선택된 PPT 화면 녹화 영상 없음'}</p>
           </div>
         </div>
 
-        <div className="rounded-3xl border border-white/10 bg-white/5 p-4">
-          <p className="text-xs uppercase tracking-[0.25em] text-slate-400">분석 완료 후 이동</p>
+        <div className="rounded-lg border border-brand-200 bg-brand-50 p-4">
+          <p className="text-xs uppercase tracking-[0.25em] text-brand-600">분석 완료 후 이동</p>
           <select
             value={nextStep}
             onChange={(event) => setNextStep(event.target.value as 'analysis' | 'qa')}
-            className="mt-3 w-full rounded-2xl border border-white/10 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none"
+            className="mt-3 w-full rounded-lg border border-brand-200 bg-white px-3 py-2 text-sm text-brand-900 outline-none"
           >
             <option value="analysis">분석 페이지</option>
             <option value="qa">AI Q&A 세션</option>
@@ -455,31 +455,31 @@ export function UploadTrainingPage() {
         </div>
 
         {videoFile || pptVideoFile ? (
-          <div className="rounded-3xl border border-white/10 bg-white/5 p-4">
-            <p className="text-xs uppercase tracking-[0.25em] text-slate-400">선택된 소스</p>
-            {videoFile ? <p className="mt-2 text-sm text-slate-200">발표 영상: {videoFile.name} ({formatFileSize(videoFile.size)})</p> : null}
-            {pptVideoFile ? <p className="mt-2 text-sm text-slate-200">PPT 녹화 영상: {pptVideoFile.name} ({formatFileSize(pptVideoFile.size)})</p> : null}
+          <div className="rounded-lg border border-brand-200 bg-brand-50 p-4">
+            <p className="text-xs uppercase tracking-[0.25em] text-brand-600">선택된 소스</p>
+            {videoFile ? <p className="mt-2 text-sm text-brand-700">발표 영상: {videoFile.name} ({formatFileSize(videoFile.size)})</p> : null}
+            {pptVideoFile ? <p className="mt-2 text-sm text-brand-700">PPT 녹화 영상: {pptVideoFile.name} ({formatFileSize(pptVideoFile.size)})</p> : null}
           </div>
         ) : null}
 
         {previewUrl ? (
-          <div className="space-y-4 rounded-3xl border border-white/10 bg-white/5 p-4">
+          <div className="space-y-4 rounded-lg border border-brand-200 bg-brand-50 p-4">
             <div>
-              <p className="text-xs uppercase tracking-[0.25em] text-slate-400">영상 미리보기</p>
-               <p className="mt-1 text-sm text-slate-300">타임라인은 현재 분석 결과를 기반으로 생성됩니다.</p>
+              <p className="text-xs uppercase tracking-[0.25em] text-brand-600">영상 미리보기</p>
+               <p className="mt-1 text-sm text-brand-700">타임라인은 현재 분석 결과를 기반으로 생성됩니다.</p>
             </div>
 
             <video
               ref={videoRef}
               src={previewUrl}
               controls
-              className="w-full rounded-2xl border border-white/10 bg-slate-900"
+              className="w-full rounded-lg border border-brand-200 bg-white"
             />
 
             {feedbackItems.length > 0 ? (
               <VideoFeedbackTimeline videoRef={videoRef} items={feedbackItems} />
             ) : (
-              <p className="text-sm text-slate-400">분석을 시작하면 피드백 타임라인이 표시됩니다.</p>
+              <p className="text-sm text-brand-600">분석을 시작하면 피드백 타임라인이 표시됩니다.</p>
             )}
           </div>
         ) : null}
@@ -496,13 +496,13 @@ export function UploadTrainingPage() {
           </div>
         ) : (
           <div className="space-y-2">
-            <div className="flex items-center justify-between text-xs uppercase tracking-[0.2em] text-slate-400">
+            <div className="flex items-center justify-between text-xs uppercase tracking-[0.2em] text-brand-600">
                <span>업로드 진행률</span>
               <span>{uploadProgress}%</span>
             </div>
-            <div className="h-2 overflow-hidden rounded-full bg-white/10">
+            <div className="h-2 overflow-hidden rounded-full bg-brand-200">
               <div
-                className="h-full rounded-full bg-gradient-to-r from-brand-400 to-brand-500 transition-all"
+                className="h-full rounded-full bg-gradient-to-r from-brand-500 to-brand-600 transition-all"
                 style={{ width: `${uploadProgress}%` }}
               />
             </div>
@@ -510,7 +510,7 @@ export function UploadTrainingPage() {
         )}
 
         {localError ? (
-          <p className="rounded-2xl border border-rose-400/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
+          <p className="rounded-lg border border-rose-300 bg-rose-50 px-4 py-3 text-sm text-rose-900">
             {localError}
           </p>
         ) : null}
@@ -550,24 +550,24 @@ export function UploadTrainingPage() {
       </Card>
 
       <Card className="space-y-4">
-        <p className="text-xs uppercase tracking-[0.3em] text-brand-300">AI 분석 상태</p>
+        <p className="text-xs uppercase tracking-[0.3em] text-brand-600">AI 분석 상태</p>
 
         <div className="space-y-3">
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-            <p className="text-xs uppercase tracking-[0.2em] text-slate-400">워크플로 상태</p>
-            <p className="mt-2 text-lg font-semibold text-white">{statusLabels[status] ?? status}</p>
+          <div className="rounded-lg border border-brand-200 bg-brand-50 p-4">
+            <p className="text-xs uppercase tracking-[0.2em] text-brand-600">워크플로 상태</p>
+            <p className="mt-2 text-lg font-semibold text-brand-900">{statusLabels[status] ?? status}</p>
           </div>
 
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-            <p className="text-xs uppercase tracking-[0.2em] text-slate-400">세션 ID</p>
-            <p className="mt-2 break-all text-sm font-medium text-slate-200">
+          <div className="rounded-lg border border-brand-200 bg-brand-50 p-4">
+            <p className="text-xs uppercase tracking-[0.2em] text-brand-600">세션 ID</p>
+            <p className="mt-2 break-all text-sm font-medium text-brand-700">
               {sessionId ?? '없음'}
             </p>
           </div>
 
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-            <p className="text-xs uppercase tracking-[0.2em] text-slate-400">분석 요약</p>
-            <p className="mt-2 text-sm text-slate-200">
+          <div className="rounded-lg border border-brand-200 bg-brand-50 p-4">
+            <p className="text-xs uppercase tracking-[0.2em] text-brand-600">분석 요약</p>
+            <p className="mt-2 text-sm text-brand-700">
               {data?.analysis_result.logic_summary ?? '아직 분석이 시작되지 않았습니다.'}
             </p>
           </div>

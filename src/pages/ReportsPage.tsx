@@ -10,12 +10,12 @@ const ANALYSIS_DATA_STORAGE_KEY = 'kit_vibe_analysis_data'
 
 function AIThinking() {
   return (
-    <div className="rounded-3xl border border-brand-500/20 bg-brand-500/10 p-6">
+    <div className="rounded-lg border border-brand-300 bg-brand-50 p-6">
       <div className="flex items-center gap-3">
-        <span className="inline-flex h-3 w-3 rounded-full bg-brand-300 animate-pulse" />
-        <p className="text-sm font-semibold text-brand-100">AI 처리 중</p>
+        <span className="inline-flex h-3 w-3 rounded-full bg-brand-600 animate-pulse" />
+        <p className="text-sm font-semibold text-brand-900">AI 처리 중</p>
       </div>
-      <p className="mt-3 text-sm text-slate-200">최종 코칭 리포트를 준비하고 있습니다...</p>
+      <p className="mt-3 text-sm text-brand-700">최종 코칭 리포트를 준비하고 있습니다...</p>
     </div>
   )
 }
@@ -33,19 +33,19 @@ function ErrorRecovery({
 }) {
   const message = error instanceof Error ? error.message : '다시 시도해 주세요.'
   return (
-    <Card className="space-y-4 rounded-2xl border border-rose-400/30 bg-rose-500/10 p-4 text-rose-100">
+    <Card className="space-y-4 rounded-lg border border-rose-300 bg-rose-50 p-4 text-rose-900">
       <div>
-        <h3 className="text-lg font-semibold text-white">문제가 발생했습니다</h3>
-        <p className="mt-2 text-sm leading-6 text-rose-100">{message}</p>
+        <h3 className="text-lg font-semibold text-brand-900">문제가 발생했습니다</h3>
+        <p className="mt-2 text-sm leading-6 text-rose-700">{message}</p>
       </div>
       <div className="flex flex-wrap gap-2">
         {onRetry ? (
-          <button type="button" onClick={() => void onRetry()} className="rounded-full bg-brand-500 px-4 py-2 text-xs font-semibold text-slate-950">
+          <button type="button" onClick={() => void onRetry()} className="rounded-lg bg-brand-600 px-4 py-2 text-xs font-semibold text-white">
             다시 시도
           </button>
         ) : null}
         {sessionId && onRecoverSession ? (
-          <button type="button" onClick={() => void onRecoverSession()} className="rounded-full border border-white/15 px-4 py-2 text-xs font-semibold text-white">
+          <button type="button" onClick={() => void onRecoverSession()} className="rounded-lg border border-brand-200 px-4 py-2 text-xs font-semibold text-brand-900">
             세션 복구
           </button>
         ) : null}
@@ -60,22 +60,22 @@ function ScoreHero({ score }: { score: number }) {
   const levelLabel = boundedScore >= 85 ? '상위 퍼포먼스' : boundedScore >= 70 ? '안정적 성장' : '집중 개선 구간'
 
   return (
-    <section className="rounded-3xl border border-brand-500/20 bg-gradient-to-br from-brand-500/15 to-slate-900 p-6" style={{ animation: 'reportReveal 500ms ease-out both' }}>
-      <p className="text-xs uppercase tracking-[0.25em] text-brand-300">종합 점수</p>
+    <section className="rounded-lg border border-brand-300 bg-gradient-to-br from-brand-50 to-white p-6" style={{ animation: 'reportReveal 500ms ease-out both' }}>
+      <p className="text-xs uppercase tracking-[0.25em] text-brand-600">종합 점수</p>
       <div className="mt-4 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-5xl font-black text-white">{score}</p>
-          <p className="mt-1 text-sm text-brand-200">{levelLabel}</p>
+          <p className="text-5xl font-black text-brand-900">{score}</p>
+          <p className="mt-1 text-sm text-brand-600">{levelLabel}</p>
         </div>
-        <p className="max-w-xl text-sm leading-6 text-slate-200">{tone}</p>
+        <p className="max-w-xl text-sm leading-6 text-brand-700">{tone}</p>
       </div>
       <div className="mt-6">
-        <div className="mb-2 flex items-center justify-between text-xs uppercase tracking-[0.2em] text-slate-300">
+        <div className="mb-2 flex items-center justify-between text-xs uppercase tracking-[0.2em] text-brand-600">
           <span>코칭 진행도</span>
           <span>{boundedScore}%</span>
         </div>
-        <div className="h-3 overflow-hidden rounded-full bg-white/10">
-          <div className="h-full rounded-full bg-gradient-to-r from-brand-400 to-brand-500 transition-all duration-700" style={{ width: `${boundedScore}%` }} />
+        <div className="h-3 overflow-hidden rounded-full bg-brand-200">
+          <div className="h-full rounded-full bg-gradient-to-r from-brand-500 to-brand-600 transition-all duration-700" style={{ width: `${boundedScore}%` }} />
         </div>
       </div>
       <style>{`@keyframes reportReveal { from { opacity: 0; transform: translateY(10px);} to { opacity: 1; transform: translateY(0);} }`}</style>
@@ -87,15 +87,15 @@ function FeedbackSection({ title, items, variant, animationDelayMs = 0 }: { titl
   const isStrength = variant === 'strength'
   return (
     <section className="space-y-4" style={{ animation: `reportReveal 500ms ease-out ${animationDelayMs}ms both` }}>
-      <p className={`text-xs uppercase tracking-[0.25em] ${isStrength ? 'text-emerald-300' : 'text-amber-300'}`}>{title}</p>
+      <p className={`text-xs uppercase tracking-[0.25em] ${isStrength ? 'text-emerald-600' : 'text-amber-600'}`}>{title}</p>
       <div className="grid gap-4 md:grid-cols-2">
         {(items.length > 0 ? items : ['아직 피드백 데이터가 없습니다.']).map((item, index) => (
-          <article key={`${variant}-${index}`} className={`rounded-2xl border p-4 ${isStrength ? 'border-emerald-400/30 bg-emerald-500/10' : 'border-amber-400/30 bg-amber-500/10'}`}>
+          <article key={`${variant}-${index}`} className={`rounded-lg border p-4 ${isStrength ? 'border-emerald-300 bg-emerald-50' : 'border-amber-300 bg-amber-50'}`}>
             <div className="mb-2 flex items-center gap-2">
               <span>{isStrength ? '✅' : '⚠️'}</span>
-              <p className={`text-xs font-semibold uppercase tracking-[0.2em] ${isStrength ? 'text-emerald-200' : 'text-amber-200'}`}>{isStrength ? '강점' : '주의'} {index + 1}</p>
+              <p className={`text-xs font-semibold uppercase tracking-[0.2em] ${isStrength ? 'text-emerald-700' : 'text-amber-700'}`}>{isStrength ? '강점' : '주의'} {index + 1}</p>
             </div>
-            <p className="text-sm leading-6 text-slate-100">{item}</p>
+            <p className="text-sm leading-6 text-brand-800">{item}</p>
           </article>
         ))}
       </div>
@@ -107,13 +107,13 @@ function FeedbackSection({ title, items, variant, animationDelayMs = 0 }: { titl
 function ActionPlan({ items, animationDelayMs = 0 }: { items: string[]; animationDelayMs?: number }) {
   const actionItems = items.length > 0 ? items : ['모의 인터뷰를 한 번 더 진행하고, 한 가지 개선 포인트에 집중해 보세요.']
   return (
-    <section className="rounded-3xl border border-brand-500/20 bg-white/5 p-6" style={{ animation: `reportReveal 500ms ease-out ${animationDelayMs}ms both` }}>
-      <p className="text-xs uppercase tracking-[0.25em] text-brand-300">실행 계획</p>
+    <section className="rounded-lg border border-brand-200 bg-brand-50 p-6" style={{ animation: `reportReveal 500ms ease-out ${animationDelayMs}ms both` }}>
+      <p className="text-xs uppercase tracking-[0.25em] text-brand-600">실행 계획</p>
       <ol className="mt-5 space-y-3">
         {actionItems.map((item, index) => (
-          <li key={`action-${index}`} className="flex gap-3 rounded-2xl border border-white/10 bg-slate-900/60 p-4">
-            <span className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-500/20 text-xs font-semibold text-brand-200">{index + 1}</span>
-            <p className="text-sm leading-6 text-slate-100">{item}</p>
+          <li key={`action-${index}`} className="flex gap-3 rounded-lg border border-brand-200 bg-white p-4">
+            <span className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-brand-100 text-xs font-semibold text-brand-700">{index + 1}</span>
+            <p className="text-sm leading-6 text-brand-800">{item}</p>
           </li>
         ))}
       </ol>
@@ -171,9 +171,9 @@ export function ReportsPage() {
   if (!sessionId) {
     return (
       <Card className="space-y-3">
-        <p className="text-xs uppercase tracking-[0.3em] text-brand-300">AI 코칭 리포트</p>
-        <h2 className="text-2xl font-black text-white">선택된 세션이 없습니다</h2>
-        <p className="text-sm leading-6 text-slate-300">업로드부터 시작해 주세요.</p>
+        <p className="text-xs uppercase tracking-[0.3em] text-brand-600">AI 코칭 리포트</p>
+        <h2 className="text-2xl font-black text-brand-900">선택된 세션이 없습니다</h2>
+        <p className="text-sm leading-6 text-brand-700">업로드부터 시작해 주세요.</p>
       </Card>
     )
   }
@@ -207,9 +207,9 @@ export function ReportsPage() {
   if (!report) {
     return (
       <Card className="space-y-3">
-        <p className="text-xs uppercase tracking-[0.3em] text-brand-300">AI 코칭 리포트</p>
-        <h2 className="text-2xl font-black text-white">리포트 데이터가 비어 있습니다</h2>
-        <p className="text-sm leading-6 text-slate-300">리포트 API에서 코칭 데이터가 반환되지 않았습니다.</p>
+        <p className="text-xs uppercase tracking-[0.3em] text-brand-600">AI 코칭 리포트</p>
+        <h2 className="text-2xl font-black text-brand-900">리포트 데이터가 비어 있습니다</h2>
+        <p className="text-sm leading-6 text-brand-700">리포트 API에서 코칭 데이터가 반환되지 않았습니다.</p>
       </Card>
     )
   }
@@ -217,8 +217,8 @@ export function ReportsPage() {
   return (
     <div className="space-y-6">
       <div className="space-y-3">
-        <p className="text-xs uppercase tracking-[0.3em] text-brand-300">AI 코칭 리포트</p>
-        <h2 className="text-3xl font-black text-white">최종 코칭 요약</h2>
+        <p className="text-xs uppercase tracking-[0.3em] text-brand-600">AI 코칭 리포트</p>
+        <h2 className="text-3xl font-black text-brand-900">최종 코칭 요약</h2>
       </div>
 
       <ScoreHero score={report.overall_score} />

@@ -71,25 +71,25 @@ export function DashboardPage() {
         <Card className="space-y-5">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
-              <p className="text-xs uppercase tracking-[0.3em] text-brand-300">대시보드</p>
-              <h2 className="mt-2 text-3xl font-black text-white">시작하기</h2>
+              <p className="text-xs uppercase tracking-[0.3em] text-brand-700">대시보드</p>
+              <h2 className="mt-2 text-3xl font-black text-brand-900">시작하기</h2>
             </div>
             <Button onClick={handleStartNewSession}>새 세션 시작</Button>
           </div>
 
-          <div className="space-y-3 text-sm leading-6 text-slate-300">
-            <p className="rounded-2xl bg-white/5 p-4">1. 발표 영상 업로드</p>
-            <p className="rounded-2xl bg-white/5 p-4">2. AI Q&A 연습</p>
-            <p className="rounded-2xl bg-white/5 p-4">3. 코칭 리포트 확인</p>
+          <div className="space-y-3 text-sm leading-6 text-brand-700">
+            <p className="rounded-lg bg-brand-50 p-4 border border-brand-200">1. 발표 영상 업로드</p>
+            <p className="rounded-lg bg-brand-50 p-4 border border-brand-200">2. AI Q&A 연습</p>
+            <p className="rounded-lg bg-brand-50 p-4 border border-brand-200">3. 코칭 리포트 확인</p>
           </div>
         </Card>
 
         {savedSession && (
-          <Card className="space-y-4 border-brand-500/30 bg-brand-500/5">
+          <Card className="space-y-4 border-brand-300 bg-brand-100">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
-                <p className="text-xs uppercase tracking-[0.3em] text-brand-300">저장된 세션</p>
-                <h3 className="mt-2 text-xl font-semibold text-white">진행 중</h3>
+                <p className="text-xs uppercase tracking-[0.3em] text-brand-700">저장된 세션</p>
+                <h3 className="mt-2 text-xl font-semibold text-brand-900">진행 중</h3>
               </div>
             </div>
             <div className="flex gap-2 flex-wrap">
@@ -103,9 +103,9 @@ export function DashboardPage() {
       <section className="grid gap-4 md:grid-cols-3">
         {quickLinks.map((item) => (
           <Link key={item.label} to={item.to}>
-            <Card className="h-full space-y-2 transition hover:border-brand-500/25 hover:bg-white/7">
-              <p className="text-xs uppercase tracking-[0.25em] text-slate-500">바로가기</p>
-              <h3 className="text-lg font-semibold text-white">{item.label}</h3>
+            <Card className="h-full space-y-2 transition hover:border-brand-300 hover:bg-brand-100">
+              <p className="text-xs uppercase tracking-[0.25em] text-brand-600">바로가기</p>
+              <h3 className="text-lg font-semibold text-brand-900">{item.label}</h3>
             </Card>
           </Link>
         ))}
