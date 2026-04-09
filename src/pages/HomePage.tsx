@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useState, type FormEvent, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import heroImg from '../assets/hero.png'
 import { Button } from '../components/ui/Button'
@@ -25,7 +25,15 @@ export function HomePage() {
   const navigate = useNavigate()
   const [speakerName, setSpeakerName] = useLocalStorage('ai-pitch-master:speaker-name', '게스트')
   const [draftName, setDraftName] = useState(speakerName)
-  const { clearSessionFromStorage } = useAppStore()
+  const { clearSessionFromStorage, currentStep, sessionId } = useAppStore()
+
+  // 홈페이지 진입 시 세션 정리
+  useEffect(() => {
+    // 이미 세션 중이면 대시보드로 리다이렉트
+    if (sessionId && currentStep && currentStep !== 'upload') {
+      navigate('/dashboard', { replace: true })
+    }
+  }, [])
 
   const handleSaveProfile = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -34,7 +42,7 @@ export function HomePage() {
 
   const handleStartPractice = async () => {
     await clearSessionFromStorage()
-    navigate('/practice')
+    navigate('/upload-training')
   }
 
   return (

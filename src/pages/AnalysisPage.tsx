@@ -61,28 +61,28 @@ function InsightCard({ data }: { data: InsightCardData }) {
     switch (data.metricType) {
       case 'wpm':
         return data.value < 80
-          ? { icon: '🐢', title: 'Speaking Pace', insight: 'Your speaking speed is below average (< 80 WPM).', explanation: 'You may be speaking too slowly, which can reduce engagement.', tip: 'Try increasing your pace slightly to maintain audience attention while ensuring clarity.', color: 'amber' as const }
+          ? { icon: '🐢', title: '발화 속도', insight: '평균보다 느린 발화 속도입니다 (< 80 WPM).', explanation: '너무 느린 속도는 청중의 집중력을 떨어뜨릴 수 있습니다.', tip: '속도를 조금 높여 청중의 주의를 유지하되, 명확함은 잃지 않도록 하세요.', color: 'amber' as const }
           : data.value > 160
-            ? { icon: '🚀', title: 'Speaking Pace', insight: 'Your speaking speed is very fast (> 160 WPM).', explanation: 'You speak rapidly, which can indicate nervousness or high energy.', tip: 'Add strategic pauses to emphasize key points and give your audience time to process.', color: 'orange' as const }
-            : { icon: '⏱️', title: 'Speaking Pace', insight: `Your speaking speed is ${data.value} WPM - ideal for presentations.`, explanation: 'Your pace is well-balanced, allowing clear communication without rushing.', tip: 'Maintain this pace but watch for acceleration during stressful Q&A moments.', color: 'emerald' as const }
+            ? { icon: '🚀', title: '발화 속도', insight: '매우 빠른 발화 속도입니다 (> 160 WPM).', explanation: '빠른 속도는 긴장이나 높은 에너지를 나타낼 수 있습니다.', tip: '핵심 포인트를 강조하고 청중이 이해할 시간을 주기 위해 전략적 멈춤을 추가하세요.', color: 'orange' as const }
+            : { icon: '⏱️', title: '발화 속도', insight: `발화 속도가 ${data.value} WPM으로 발표에 이상적입니다.`, explanation: '속도가 균형잡혀 있어 명확한 의사소통이 가능합니다.', tip: '이 속도를 유지하되, 질문 세션 중 속도 가속에 주의하세요.', color: 'emerald' as const }
       case 'filler_words':
         return data.value === 0
-          ? { icon: '✨', title: 'Verbal Fluency', insight: 'You used zero filler words - excellent control!', explanation: 'No "ums," "ahs," or "likes" detected in your presentation.', tip: 'This is excellent! Continue practicing silence over filler words.', color: 'emerald' as const }
+          ? { icon: '✨', title: '음성 명료도', insight: '군더더기 표현이 완전히 없습니다 - 훌륭한 조절력입니다!', explanation: '"어", "아", "그" 같은 표현이 발견되지 않았습니다.', tip: '매우 우수합니다! 이 수준의 무음 활용을 계속 연습하세요.', color: 'emerald' as const }
           : data.value < 3
-            ? { icon: '👍', title: 'Verbal Fluency', insight: 'You use very few filler words - great job!', explanation: 'Only occasional "ums" or "ahs" detected, showing good control.', tip: 'Keep this up! Replace any remaining filler words with intentional pauses.', color: 'emerald' as const }
+            ? { icon: '👍', title: '음성 명료도', insight: '군더더기 표현이 매우 적습니다 - 잘했어요!', explanation: '간헐적인 "어"나 "아"만 감지되어 좋은 조절력을 보여줍니다.', tip: '이 수준을 유지하세요! 남은 군더더기를 의도적 침묵으로 대체하세요.', color: 'emerald' as const }
             : data.value < 8
-              ? { icon: '🎯', title: 'Verbal Fluency', insight: 'You use a moderate amount of filler words.', explanation: `${data.value} filler words detected throughout your presentation.`, tip: 'Practice pausing instead of filling silence. Record yourself to identify your habit words.', color: 'cyan' as const }
-              : { icon: '⚠️', title: 'Verbal Fluency', insight: `You used ${data.value}+ filler words frequently.`, explanation: 'Frequent "ums," "ahs," and "likes" can distract your audience.', tip: 'Practice deliberate pauses. Record practice sessions and count your filler words.', color: 'amber' as const }
+              ? { icon: '🎯', title: '음성 명료도', insight: '중정도의 군더더기 표현이 있습니다.', explanation: `발표 전체에서 ${data.value}개의 군더더기 표현이 감지되었습니다.`, tip: '침묵 대신 말하기 연습을 하세요. 본인의 습관 표현을 파악하려면 녹음 후 청취하세요.', color: 'cyan' as const }
+              : { icon: '⚠️', title: '음성 명료도', insight: `${data.value}개 이상의 군더더기 표현을 자주 사용합니다.`, explanation: '자주 나오는 "어", "아", "그" 같은 표현은 청중을 산만하게 할 수 있습니다.', tip: '의도적인 침묵을 연습하세요. 연습 녹음을 하며 군더더기 표현을 세어보세요.', color: 'amber' as const }
       case 'gaze_score':
         return data.value >= 90
-          ? { icon: '👀', title: 'Eye Contact', insight: `Your eye contact score is ${data.value}/100 - exceptional!`, explanation: 'You maintain strong, consistent eye contact throughout your presentation.', tip: 'Maintain this level of engagement. You\'re connecting well with your audience.', color: 'emerald' as const }
+          ? { icon: '👀', title: '시선 접촉', insight: `시선 접촉 점수가 ${data.value}/100입니다 - 탁월합니다!`, explanation: '발표 내내 강하고 일관된 시선 접촉을 유지하고 있습니다.', tip: '이 수준의 관심을 유지하세요. 청중과의 연결이 매우 좋습니다.', color: 'emerald' as const }
           : data.value >= 75
-            ? { icon: '👁️', title: 'Eye Contact', insight: `Your eye contact score is ${data.value}/100 - strong performance.`, explanation: 'Generally good eye contact with minor drops during complex sections.', tip: 'Practice maintaining eye contact during technical transitions or difficult slides.', color: 'cyan' as const }
+            ? { icon: '👁️', title: '시선 접촉', insight: `시선 접촉 점수가 ${data.value}/100입니다 - 좋은 성과입니다.`, explanation: '전반적으로 좋은 시선 접촉이나 복잡한 부분에서 약간의 하락이 있습니다.', tip: '기술적 전환이나 어려운 슬라이드 중 시선 접촉을 유지하는 연습을 하세요.', color: 'cyan' as const }
             : data.value >= 60
-              ? { icon: '🔍', title: 'Eye Contact', insight: `Your eye contact score is ${data.value}/100 - room for improvement.`, explanation: 'Your gaze frequently drifts to slides or notes.', tip: 'Practice looking at your audience between slides. Memorize key transition points.', color: 'amber' as const }
-              : { icon: '⬇️', title: 'Eye Contact', insight: `Your eye contact score is ${data.value}/100 - needs attention.`, explanation: 'You\'re looking down significantly, reducing audience connection.', tip: 'Spend 60% of your time looking at the audience, 40% at slides. Use a speaker remote.', color: 'rose' as const }
+              ? { icon: '🔍', title: '시선 접촉', insight: `시선 접촉 점수가 ${data.value}/100입니다 - 개선 여지가 있습니다.`, explanation: '시선이 슬라이드나 노트로 자주 흘러갑니다.', tip: '슬라이드 전환 사이 청중을 바라보는 연습을 하세요. 주요 전환점을 암기하세요.', color: 'amber' as const }
+              : { icon: '⬇️', title: '시선 접촉', insight: `시선 접촉 점수가 ${data.value}/100입니다 - 주의가 필요합니다.`, explanation: '아래를 자주 봐서 청중과의 연결이 감소하고 있습니다.', tip: '청중을 60%, 슬라이드를 40% 바라보세요. 발표자 리모컨을 사용하세요.', color: 'rose' as const }
       default:
-        return { icon: '❓', title: 'Unknown Metric', insight: 'Unknown metric type', explanation: '', tip: '', color: 'slate' as const }
+        return { icon: '❓', title: '알 수 없는 지표', insight: '알 수 없는 지표 유형입니다', explanation: '', tip: '', color: 'slate' as const }
     }
   }, [data])
 
@@ -109,11 +109,11 @@ function InsightCard({ data }: { data: InsightCardData }) {
         <span className={`inline-block rounded-lg px-3 py-1 text-xs font-semibold ${colors.badge}`}>
           {data.metricType === 'gaze_score' ? `${data.value}/100` : data.value}
           {data.metricType === 'wpm' && ' WPM'}
-          {data.metricType === 'filler_words' && ' instances'}
+          {data.metricType === 'filler_words' && '개'}
         </span>
       </div>
       <div className={`rounded-lg border p-3 ${colors.border} ${colors.bg}`}>
-        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-brand-700">💡 Coaching Tip</p>
+        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-brand-700">💡 코칭 팁</p>
         <p className="text-sm leading-6 text-brand-800">{insight.tip}</p>
       </div>
     </div>
@@ -126,6 +126,21 @@ interface SavedAnalysisPayload {
   sessionId: string
   analysis: PresentationAnalyzeResponse
   timestamp: string
+}
+
+function localizeLogicSummary(text: string) {
+  if (!text) return '논리 구조 요약을 생성하지 못했습니다.'
+  if (/[가-힣]/.test(text)) return text
+
+  const normalized = text
+    .replace(/your presentation/gi, '발표는')
+    .replace(/good structure/gi, '구조가 좋습니다')
+    .replace(/needs improvement/gi, '개선이 필요합니다')
+    .replace(/conclusion/gi, '결론')
+    .replace(/introduction/gi, '서론')
+    .replace(/logic/gi, '논리')
+
+  return `논리 구조 요약: ${normalized}`
 }
 
 export function AnalysisPage() {
@@ -233,7 +248,7 @@ export function AnalysisPage() {
 
       <Card className="space-y-3">
         <p className="text-xs uppercase tracking-[0.25em] text-brand-600">논리 구조 요약</p>
-        <p className="text-sm leading-7 text-brand-700">{analysis.analysis_result.logic_summary}</p>
+        <p className="text-sm leading-7 text-brand-700">{localizeLogicSummary(analysis.analysis_result.logic_summary)}</p>
       </Card>
 
       <Card className="space-y-3">

@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import type { QnaHistoryItem } from '../../../types'
 
 const QUESTION_TIME_LIMIT_SECONDS = 30
+const MAX_QA_ROUNDS = 3
 const QA_SESSION_STORAGE_KEY = 'kit_vibe_qa_session'
 
 type InterviewSessionPhase =
@@ -10,6 +11,7 @@ type InterviewSessionPhase =
   | 'user-answering'
   | 'evaluating'
   | 'feedback-ready'
+  | 'completed'
 
 interface AiQaSessionState {
   phase: InterviewSessionPhase
@@ -18,6 +20,8 @@ interface AiQaSessionState {
   answerDraft: string
   recordedAudioBlob: Blob | null
   qnaHistory: QnaHistoryItem[]
+  currentRound: number
+  maxRounds: number
   setCurrentQuestion: (questionText: string) => void
   setAnswerDraft: (answerDraft: string) => void
   setRecordedAudioBlob: (blob: Blob | null) => void
@@ -27,6 +31,7 @@ interface AiQaSessionState {
   moveToUserAnswering: () => void
   moveToFeedbackReady: () => void
   appendHistory: (item: QnaHistoryItem) => void
+  isQACompleted: () => boolean
   resetSession: () => void
   restoreSessionFromStorage: () => void
   saveSessionToStorage: () => void
@@ -39,11 +44,14 @@ export const useAiQaSessionStore = create<AiQaSessionState>((set, get) => ({
   answerDraft: '',
   recordedAudioBlob: null,
   qnaHistory: [],
+  currentRound: 0,
+  maxRounds: MAX_QA_ROUNDS,
   setCurrentQuestion: (questionText) =>
-    set({
+    set((state) => ({
       currentQuestionText: questionText,
       phase: 'ai-speaking',
-    }),
+      currentRound: state.currentRound + 1,
+    })),
   setAnswerDraft: (answerDraft) => set({ answerDraft }),
   setRecordedAudioBlob: (blob) => set({ recordedAudioBlob: blob }),
   resetQuestionTimer: () => set({ questionRemainingSeconds: QUESTION_TIME_LIMIT_SECONDS }),
@@ -67,10 +75,25 @@ export const useAiQaSessionStore = create<AiQaSessionState>((set, get) => ({
     get().saveSessionToStorage()
   },
   appendHistory: (item) => {
-    set((state) => ({ qnaHistory: [...state.qnaHistory, item] }))
+    set((state) => {
+      const newHistory = [...state.qnaHistory, item]
+      const isCompleted = newHistory.length >= state.maxRounds
+      return {
+        qnaHistory: newHistory,
+        phase: isCompleted ? 'completed' : state.phase,
+      }
+    })
     get().saveSessionToStorage()
   },
-  resetSession: () =>
+  isQACompleted: () => {
+    const state = get()
+    return state.qnaHistory.length >= state.maxRounds
+  },
+  resetSession: () => {
+    if (typeof window !== 'undefined') {
+      window.localStorage.removeItem(QA_SESSION_STORAGE_KEY)
+    }
+
     set({
       phase: 'waiting',
       currentQuestionText: null,
@@ -78,7 +101,9 @@ export const useAiQaSessionStore = create<AiQaSessionState>((set, get) => ({
       answerDraft: '',
       recordedAudioBlob: null,
       qnaHistory: [],
-    }),
+      currentRound: 0,
+    })
+  },
 
 
   // Session persistence
@@ -90,10 +115,16 @@ export const useAiQaSessionStore = create<AiQaSessionState>((set, get) => ({
     try {
       const savedSession = window.localStorage.getItem(QA_SESSION_STORAGE_KEY)
       if (savedSession) {
-        const { qnaHistory } = JSON.parse(savedSession) as {
+        const { qnaHistory, currentRound, phase } = JSON.parse(savedSession) as {
           qnaHistory: QnaHistoryItem[]
+          currentRound?: number
+          phase?: InterviewSessionPhase
         }
-        set({ qnaHistory })
+        set({
+          qnaHistory: qnaHistory ?? [],
+          currentRound: currentRound ?? (qnaHistory?.length ?? 0),
+          phase: phase ?? 'waiting',
+        })
       }
     } catch (error) {
       console.error('Failed to restore QA session from storage:', error)
@@ -106,8 +137,8 @@ export const useAiQaSessionStore = create<AiQaSessionState>((set, get) => ({
     }
 
     try {
-      const { qnaHistory } = get()
-      window.localStorage.setItem(QA_SESSION_STORAGE_KEY, JSON.stringify({ qnaHistory }))
+      const { qnaHistory, currentRound, phase } = get()
+      window.localStorage.setItem(QA_SESSION_STORAGE_KEY, JSON.stringify({ qnaHistory, currentRound, phase }))
     } catch (error) {
       console.error('Failed to save QA session to storage:', error)
     }

@@ -4,9 +4,24 @@ import { useFinalReportQuery } from '../api/queries/reportQueries'
 import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
 import { useAppStore } from '../store/useAppStore'
+import type { QnaHistoryItem } from '../types'
 
 // Storage key for analysis data
 const ANALYSIS_DATA_STORAGE_KEY = 'kit_vibe_analysis_data'
+const QA_SESSION_STORAGE_KEY = 'kit_vibe_qa_session'
+
+function getStoredQnaHistory(): QnaHistoryItem[] {
+  if (typeof window === 'undefined') return []
+
+  try {
+    const raw = window.localStorage.getItem(QA_SESSION_STORAGE_KEY)
+    if (!raw) return []
+    const parsed = JSON.parse(raw) as { qnaHistory?: QnaHistoryItem[] }
+    return parsed.qnaHistory ?? []
+  } catch {
+    return []
+  }
+}
 
 function AIThinking() {
   return (
@@ -122,6 +137,25 @@ function ActionPlan({ items, animationDelayMs = 0 }: { items: string[]; animatio
   )
 }
 
+function QaSummaryCard({ items, animationDelayMs = 0 }: { items: QnaHistoryItem[]; animationDelayMs?: number }) {
+  if (items.length === 0) return null
+
+  return (
+    <section className="rounded-lg border border-brand-200 bg-brand-50 p-6" style={{ animation: `reportReveal 500ms ease-out ${animationDelayMs}ms both` }}>
+      <p className="text-xs uppercase tracking-[0.25em] text-brand-600">QA 피드백 요약</p>
+      <div className="mt-4 space-y-3">
+        {items.map((item, index) => (
+          <article key={`qa-${index}`} className="rounded-lg border border-brand-200 bg-white p-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-600">라운드 {index + 1}</p>
+            <p className="mt-2 text-sm font-semibold text-brand-900">Q. {item.q}</p>
+            <p className="mt-2 text-sm leading-6 text-brand-700">A. {item.a}</p>
+          </article>
+        ))}
+      </div>
+    </section>
+  )
+}
+
 export function ReportsPage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
@@ -203,6 +237,7 @@ export function ReportsPage() {
   }
 
   const report = reportQuery.data
+  const qnaHistory = getStoredQnaHistory()
 
   if (!report) {
     return (
@@ -238,6 +273,8 @@ export function ReportsPage() {
       />
 
       <ActionPlan items={report.action_items} animationDelayMs={320} />
+
+      <QaSummaryCard items={qnaHistory} animationDelayMs={420} />
 
       <div className="flex gap-2">
         <Button onClick={handleNewSession}>새 연습 시작</Button>

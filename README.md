@@ -1,146 +1,99 @@
 # AI Pitch Master Frontend
 
-AI Pitch Master는 발표 연습을 돕는 프론트엔드 애플리케이션입니다. 사용자는 발표 영상을 업로드하고, AI 분석 결과를 확인한 뒤, AI Q&A 세션에서 실제 질문에 답하는 흐름으로 훈련할 수 있습니다.
+발표 업로드부터 분석, AI Q&A, 최종 리포트까지 사용자 경험을 담당하는 프론트엔드입니다.
 
 ---
 
-## 1. 프로젝트 전반 설명
+## 프로젝트 목적
 
-### 목표
-- 발표 훈련을 단순 시청이 아니라 **피드백 + 반복 연습**으로 연결한다.
-- 사용자가 짧은 시간 안에 업로드 → 분석 → Q&A → 리포트 흐름을 끝까지 경험하도록 만든다.
-- 기능을 늘리기보다, 핵심 행동을 명확하게 보여주는 간결한 UX를 유지한다.
+- 업로드 → 분석 → Q&A → 리포트 흐름을 한 번에 제공해 발표 훈련의 단절을 줄입니다.
+- 사용자가 현재 단계와 다음 행동을 즉시 이해할 수 있도록 단순한 상태 기반 UI를 유지합니다.
+- 백엔드 API 계약(`api-spec.md`)과 프론트 상태 모델(`Zustand`)을 일치시켜 운영 안정성을 확보합니다.
 
-### 기술 스택
-- React
-- Vite
-- TypeScript
-- TailwindCSS
-- Zustand
-- React Query
-- React Router
+---
+
+## 핵심 사용자 흐름
+
+1. `UploadTrainingPage`에서 영상 업로드
+2. `AnalysisPage`에서 분석 결과 확인
+3. `AiQaSessionPage`에서 Q&A 실전 훈련
+4. `ReportsPage`에서 최종 리포트 + QA 요약 확인
+
+---
+
+## 최신 구현 반영
+
+### Q&A 세션 (`src/pages/AiQaSessionPage.tsx`)
+
+- 최대 라운드: **3회**
+- 질문당 타이머: **30초**
+- 타이머 bar: `requestAnimationFrame` 기반 **연속 감소 애니메이션**
+- 남은 시간 5초 미만: **강조색(빨강 계열)** 자동 전환
+- 시간 만료 시: 자동 제출 후 다음 질문으로 전환
+- 카메라: 세션 종료 또는 페이지 이탈 시 스트림 강제 `stop()`
+
+#### 구현 메모
+
+- 타이머 숫자/바는 동일한 잔여 시간 소스를 사용해 표시 불일치를 줄입니다.
+- 타이머 만료 시 수동 클릭 없이 자동 제출 경로로 진입합니다.
+- 페이지 이동, 세션 종료, 비활성화 전환 시 카메라 트랙을 명시적으로 종료합니다.
+
+### 세션 정리 정책 (`src/App.tsx`, `src/store/useAppStore.ts`)
+
+- 대시보드 진입 시 세션 강제 정리
+- 앱 첫 진입 시 세션 페이지가 아니면 세션 정리
+- 세션 페이지 새로고침은 예외 처리
+- 세션 정리 성공 로그는 콘솔에 출력하지 않음
+
+#### 운영 의도
+
+- 중간 상태가 누적되어 다음 사용자 흐름에 영향을 주지 않도록 기본 진입점을 클린 상태로 유지합니다.
+- 분석/QA/리포트 페이지 새로고침은 사용자의 진행 흐름 보호를 위해 예외로 둡니다.
+
+### 리포트 연동 (`src/api/report.ts`, `src/pages/ReportsPage.tsx`)
+
+- `qna_history`를 실제 리포트 요청 payload에 포함
+- 리포트 화면에 QA 질문/답변 요약 카드 표시
+
+#### 데이터 경계
+
+- 프론트는 세션 기반 Q&A 히스토리를 직렬화해 백엔드 리포트 생성 요청에 포함합니다.
+- 백엔드는 전달된 히스토리를 점수/강점/약점/액션 항목 산출에 반영합니다.
+
+---
+
+## 기술 스택
+
+- React, Vite, TypeScript
+- Zustand, React Query
+- React Router, TailwindCSS
 - Axios
 
-### 핵심 사용자 흐름
-1. `UploadTrainingPage`에서 발표 영상을 선택한다.
-2. 서버 분석 결과를 받아 `AnalysisPage` 또는 `AiQaSessionPage`로 이동한다.
-3. `AiQaSessionPage`에서 AI 질문을 확인하고 답변을 제출한다.
-4. `ReportsPage`에서 분석 리포트를 확인한다.
+---
 
-### 주요 화면
-- `src/pages/DashboardPage.tsx`
-- `src/pages/UploadTrainingPage.tsx`
-- `src/pages/AnalysisPage.tsx`
-- `src/pages/AiQaSessionPage.tsx`
-- `src/pages/ReportsPage.tsx`
+## 디렉터리 가이드
+
+- `src/pages`: 라우트 화면
+- `src/components`: 재사용 UI/레이아웃
+- `src/api`: API 클라이언트/도메인 요청
+- `src/features`: 도메인 상태/로직
+- `src/store`: 전역 상태
+- `src/hooks`: 공통 훅
+- `src/types`: 타입 정의
+
+### 주요 파일 맵
+
+- `src/App.tsx`: 라우팅 진입점 + 세션 정리 정책
+- `src/pages/UploadTrainingPage.tsx`: 업로드/분석 시작
+- `src/pages/AnalysisPage.tsx`: 분석 결과/요약 노출
+- `src/pages/AiQaSessionPage.tsx`: Q&A 흐름/타이머/카메라
+- `src/pages/ReportsPage.tsx`: 최종 리포트 + QA 요약 카드
+- `src/store/useAppStore.ts`: 전역 세션 상태 + 정리 API 트리거
+- `src/features/ai-qa-session/store/useAiQaSessionStore.ts`: Q&A 단계/라운드/타이머 상태
 
 ---
 
-## 2. AI와 함께 정리한 기획문서
-
-이 섹션은 실제 개발 방향을 정리한 내부 기획 초안입니다.
-
-### 2.1 제품 정의
-이 제품은 발표 영상을 업로드하면 AI가 발표 품질을 분석하고, 이후 Q&A 세션을 통해 사용자가 실전 질문에 답하도록 돕는 발표 코칭 도구입니다.
-
-### 2.2 핵심 문제
-- 발표 연습 결과가 즉시 행동으로 이어지지 않는다.
-- 사용자가 어떤 부분을 개선해야 하는지 한눈에 파악하기 어렵다.
-- 단순 분석만으로는 실전 대응 훈련이 부족하다.
-
-### 2.3 해결 전략
-- 업로드 직후 분석 결과를 보여준다.
-- 분석 결과를 Q&A 훈련으로 자연스럽게 연결한다.
-- Q&A 세션은 복잡한 UI보다 “질문 확인 → 답변 제출”에 집중한다.
-
-### 2.4 사용자 플로우
-| 단계 | 화면 | 사용자가 하는 일 | 시스템 역할 |
-|---|---|---|---|
-| 1 | `UploadTrainingPage` | 발표 영상 업로드 | 파일 검증, 세션 생성, 분석 요청 |
-| 2 | `AnalysisPage` | 분석 결과 확인 | 분석 지표/요약 제공 |
-| 3 | `AiQaSessionPage` | AI 질문에 답변 | 질문 생성, 타이머, 답변 제출 |
-| 4 | `ReportsPage` | 결과 확인 | 리포트 조회 및 요약 |
-
-### 2.5 기능 범위
-#### 포함
-- 영상 업로드
-- 분석 진행 상태 표시
-- 분석 결과 요약
-- AI Q&A 세션
-- 세션 복원
-- 리포트 확인
-
-#### 제외 또는 후순위
-- 데모 모드/mock 분기
-- 과도한 다중 패널 UI
-- 복잡한 협업/공유 기능
-
-### 2.6 화면/라우트 설계
-- `/dashboard` → 시작 화면
-- `/upload-training` → 업로드 화면
-- `/analysis?sessionId=...` → 분석 화면
-- `/ai-qa-session?sessionId=...` → Q&A 세션
-- `/reports?sessionId=...` → 리포트 화면
-
-### 2.7 완료 기준
-- 업로드 후 분석 흐름이 정상 동작한다.
-- 세션 ID 기반으로 분석/QA/리포트 화면이 이어진다.
-- QA 화면에서 질문/답변 흐름이 끊기지 않는다.
-- 빌드가 성공하고 삭제된 파일 참조가 남지 않는다.
-
----
-
-## 3. 개발 지침서
-
-### 3.1 폴더 구조 원칙
-- `src/pages`: 라우트 단위 화면만 둔다.
-- `src/components`: 재사용 UI와 레이아웃만 둔다.
-- `src/api`: HTTP 클라이언트와 도메인 API를 둔다.
-- `src/features`: 도메인 상태/로직을 둔다.
-- `src/store`: 앱 전역 상태를 둔다.
-- `src/hooks`: 여러 화면에서 공유하는 공통 훅만 둔다.
-- `src/types`: 공통 타입만 둔다.
-
-### 3.2 상태 관리 원칙
-- 서버 상태는 React Query를 사용한다.
-- 화면/세션 상태는 Zustand로 관리한다.
-- 페이지에서는 selector 기반 구독을 우선 사용한다.
-- 불필요한 전역 상태는 만들지 않는다.
-
-### 3.3 API 연동 원칙
-- 공통 요청 처리는 `src/api/client.ts`에서 담당한다.
-- 기능별 API는 `src/api/*.ts`에 둔다.
-- QA 관련 mutation도 API 파일 기준으로 함께 관리한다.
-- API 응답 실패 시 사용자에게 바로 이해되는 메시지를 보여준다.
-
-### 3.4 에러 처리 원칙
-- 에러 메시지는 기술 정보보다 사용자 행동 중심으로 작성한다.
-- 최소한 다음 행동을 제공한다.
-  - 다시 시도
-  - 세션 복구
-  - 이전 화면으로 이동
-- 네트워크 오류와 입력 오류는 구분해서 다룬다.
-
-### 3.5 UI/UX 원칙
-- 한 화면에 핵심 행동은 1~2개로 제한한다.
-- 버튼 문구는 짧고 명확하게 유지한다.
-- 상태 라벨은 내부 상태명보다 사용자 관점 표현을 우선한다.
-- 중복 패널보다 단일 흐름 중심의 레이아웃을 사용한다.
-
-### 3.6 코드 작성 규칙
-- 새 기능은 페이지에만 몰아넣지 말고 적절한 계층으로 분리한다.
-- 사용하지 않는 파일/타입/import는 즉시 제거한다.
-- 이름은 화면명/도메인명과 맞춘다.
-- 공통 로직이 늘어나면 `index.ts` 또는 feature 단위 모듈로 묶는다.
-
-### 3.7 QA 세션 개발 기준
-- `AiQaSessionPage`는 “질문 생성 → 답변 제출 → 다음 질문”의 흐름만 유지한다.
-- 상태 정보는 과도하게 노출하지 않는다.
-- 복잡한 보조 UI보다 진행에 필요한 정보만 보여준다.
-
----
-
-## 4. 실행 방법
+## 실행 방법
 
 ```bash
 npm install
@@ -155,27 +108,59 @@ npm run build
 
 ---
 
-## 5. 작업 전/후 체크리스트
+## 개발 체크리스트
 
-### 작업 전
-- 수정 대상 파일의 참조 관계를 먼저 확인한다.
-- 페이지/스토어/API 경계를 넘는 변경인지 판단한다.
-
-### 작업 후
-- 빌드가 통과하는지 확인한다.
-- 삭제한 파일의 import가 남아 있지 않은지 확인한다.
-- 라우트 이동과 세션 복원이 깨지지 않았는지 확인한다.
+- Q&A 타이머 숫자와 bar가 함께 감소하는지
+- 5초 미만 강조색 전환이 동작하는지
+- Q&A 종료/라우트 이탈 시 카메라 LED가 꺼지는지
+- 리포트에 QA 요약 카드가 표시되는지
+- 빌드 오류 없이 통과하는지
 
 ---
 
-## 6. 빠른 참조
+## 트러블슈팅
+
+### 1. QA 타이머가 줄지 않음
+
+- `AiQaSessionPage`에서 현재 `phase`가 `user-answering`인지 확인
+- 콘솔에서 `[QA][timer] interval start/tick` 로그 확인
+- `useAiQaSessionStore.ts`의 `tickQuestionTimer()` 호출 여부 확인
+- 타이머 숫자와 progress bar가 같은 상태값을 읽는지 확인
+
+### 2. 카메라 영역은 꺼졌는데 기기 카메라 LED가 켜져 있음
+
+- `VideoWindow` cleanup에서 `track.stop()` 호출 여부 확인
+- 브라우저 다른 탭/앱에서 카메라 점유 중인지 확인
+- 페이지 이탈(라우트 변경) 시점 로그 확인
+- `getUserMedia` 응답이 늦게 도착하는 race 조건에서 즉시 stop 처리되는지 확인
+
+### 3. 리포트에서 QA 요약이 비어 있음
+
+- `src/api/report.ts`에서 `qna_history`를 로컬 스토리지에서 읽어오는지 확인
+- `ReportsPage`의 QA 요약 카드 렌더링 조건 확인
+- Q&A를 1회 이상 진행했는지 확인
+- `session_id`가 업로드/분석/QA/리포트에서 동일하게 이어지는지 확인
+
+### 4. 세션이 예상보다 자주 초기화됨
+
+- `App.tsx`의 라우팅 기반 세션 정리 정책 확인
+- 대시보드 진입 시 세션 정리 동작이 의도인지 확인
+- 세션 페이지 새로고침 예외 경로인지 확인
+- 수동으로 `초기화` 버튼을 눌렀는지 확인
+
+### 5. 분석 요약이 영어로 보임
+
+- `AnalysisPage`의 로컬라이즈 보정 함수 적용 여부 확인
+- 백엔드 분석 프롬프트의 한국어 작성 규칙 반영 여부 확인
+- 저장된 과거 분석 캐시(localStorage)가 오래된 응답인지 확인
+
+---
+
+## 빠른 참조
 
 - 라우터 진입점: `src/App.tsx`
-- 전역 상태: `src/store/useAppStore.ts`
-- QA 세션 상태: `src/features/ai-qa-session/store/useAiQaSessionStore.ts`
-- API 클라이언트: `src/api/client.ts`
+- 전역 세션 스토어: `src/store/useAppStore.ts`
+- QA 스토어: `src/features/ai-qa-session/store/useAiQaSessionStore.ts`
 - QA API: `src/api/qa.ts`
-- 업로드 화면: `src/pages/UploadTrainingPage.tsx`
-- QA 화면: `src/pages/AiQaSessionPage.tsx`
-- 리포트 화면: `src/pages/ReportsPage.tsx`
+- 리포트 API: `src/api/report.ts`
 
