@@ -1,3 +1,4 @@
+import { useMutation } from '@tanstack/react-query'
 import { apiRequest } from './client'
 import { getAnalysisResult } from './analysis'
 import type {
@@ -10,8 +11,6 @@ export interface NextQuestion {
   text: string
   audioBase64: string
 }
-
-const nextQuestionCache = new Map<string, NextQuestion>()
 
 export async function startQASession(sessionId: string): Promise<RoleplayStartResponse> {
   const presentationAnalysis = await getAnalysisResult(sessionId)
@@ -26,11 +25,6 @@ export async function startQASession(sessionId: string): Promise<RoleplayStartRe
     // API spec: POST /api/v1/roleplay/start
     url: '/roleplay/start',
     data: payload,
-  })
-
-  nextQuestionCache.set(sessionId, {
-    text: response.ai_question_text,
-    audioBase64: response.ai_question_audio,
   })
 
   return response
@@ -58,21 +52,25 @@ export async function sendAnswer(
     data: formData,
   })
 
-  nextQuestionCache.set(sessionId, {
-    text: response.next_ai_question_text,
-    audioBase64: response.next_ai_question_audio,
-  })
-
   return response
 }
 
-export function getNextQuestion(sessionId: string): NextQuestion {
-  const cachedQuestion = nextQuestionCache.get(sessionId)
+export interface SendAnswerVariables {
+  sessionId: string
+  audioBlobOrText: Blob | string
+  historyContext: string
+}
 
-  if (!cachedQuestion) {
-    throw new Error('No next AI question available for this session_id.')
-  }
+export function useStartQASessionMutation() {
+  return useMutation({
+    mutationFn: (sessionId: string) => startQASession(sessionId),
+  })
+}
 
-  return cachedQuestion
+export function useSendAnswerMutation() {
+  return useMutation({
+    mutationFn: ({ sessionId, audioBlobOrText, historyContext }: SendAnswerVariables) =>
+      sendAnswer(sessionId, audioBlobOrText, historyContext),
+  })
 }
 

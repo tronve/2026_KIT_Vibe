@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Button, Card } from '../components'
-import { useAppStore } from '../store'
+import { Button } from '../components/ui/Button'
+import { Card } from '../components/ui/Card'
+import { useAppStore } from '../store/useAppStore'
 
 const quickLinks = [
   { label: '훈련 업로드', to: '/upload-training' },

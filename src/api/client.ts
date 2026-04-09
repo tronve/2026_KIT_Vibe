@@ -4,7 +4,6 @@ import axios, {
   type AxiosRequestConfig,
   type InternalAxiosRequestConfig,
 } from 'axios'
-import { isDemoMode, mockApiRequest } from '../mocks'
 
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000/api/v1'
 
@@ -98,10 +97,6 @@ export const isApiError = (error: unknown): error is ApiError => {
 }
 
 export async function apiRequest<T>(config: AxiosRequestConfig): Promise<T> {
-  // In DEMO_MODE, use mock data instead of real API calls
-  if (isDemoMode()) {
-    return mockApiRequest<T>(config)
-  }
 
   const response = await apiClient.request<T>(config)
   return response.data

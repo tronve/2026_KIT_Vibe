@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Card } from '../components'
+import { Card } from '../components/ui/Card'
 
 export function NotFoundPage() {
   return (

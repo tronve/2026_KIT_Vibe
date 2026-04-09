@@ -1,9 +1,10 @@
 import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import heroImg from '../assets/hero.png'
-import { Button, Card } from '../components'
-import { useLocalStorage } from '../hooks'
-import { useAppStore } from '../store'
+import { Button } from '../components/ui/Button'
+import { Card } from '../components/ui/Card'
+import { useLocalStorage } from '../hooks/useLocalStorage'
+import { useAppStore } from '../store/useAppStore'
 
 const highlights = [
   {

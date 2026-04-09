@@ -1,20 +1,162 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent, type RefObject } from 'react'
 import { useDropzone, type FileRejection } from 'react-dropzone'
 import { useNavigate } from 'react-router-dom'
-import {
-  AIThinking,
-  AiProcessingLoadingScreen,
-  Button,
-  Card,
-  ErrorRecovery,
-  VideoFeedbackTimeline,
-  type VideoFeedbackItem,
-} from '../components'
-import { useAnalysisUpload } from '../hooks'
-import { useAppStore } from '../store'
+import { Button } from '../components/ui/Button'
+import { Card } from '../components/ui/Card'
+import { useAnalysisUpload } from '../hooks/useAnalysisUpload'
+import { useAppStore } from '../store/useAppStore'
 import type { PresentationAnalyzeResponse } from '../types'
 
 const ANALYSIS_DATA_STORAGE_KEY = 'kit_vibe_analysis_data'
+
+function AIThinking() {
+  return (
+    <div className="rounded-3xl border border-brand-500/20 bg-brand-500/10 p-6">
+      <div className="flex items-center gap-3">
+        <span className="inline-flex h-3 w-3 rounded-full bg-brand-300 animate-pulse" />
+        <p className="text-sm font-semibold text-brand-100">AI 처리 중</p>
+      </div>
+      <p className="mt-3 text-sm text-slate-200">발표를 분석하고 있습니다...</p>
+    </div>
+  )
+}
+
+function UploadErrorRecovery({
+  error,
+  onRetry,
+  sessionId,
+  onRecoverSession,
+}: {
+  error?: unknown
+  onRetry?: () => void | Promise<void>
+  sessionId?: string | null
+  onRecoverSession?: () => void | Promise<void>
+}) {
+  const message = error instanceof Error ? error.message : '다시 시도해 주세요.'
+  return (
+    <Card className="space-y-4 rounded-2xl border border-rose-400/30 bg-rose-500/10 p-4 text-rose-100">
+      <div>
+        <h3 className="text-lg font-semibold text-white">문제가 발생했습니다</h3>
+        <p className="mt-2 text-sm leading-6 text-rose-100">{message}</p>
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {onRetry ? (
+          <button type="button" onClick={() => void onRetry()} className="rounded-full bg-brand-500 px-4 py-2 text-xs font-semibold text-slate-950">
+            다시 시도
+          </button>
+        ) : null}
+        {sessionId && onRecoverSession ? (
+          <button type="button" onClick={() => void onRecoverSession()} className="rounded-full border border-white/15 px-4 py-2 text-xs font-semibold text-white">
+            세션 복구
+          </button>
+        ) : null}
+      </div>
+    </Card>
+  )
+}
+
+type VideoFeedbackItem = { id: string; timestamp: number; message: string; severity: 'low' | 'medium' | 'high' }
+
+function VideoFeedbackTimeline({ videoRef, items, title = '피드백 타임라인' }: { videoRef: RefObject<HTMLVideoElement | null>; items: VideoFeedbackItem[]; title?: string }) {
+  const [currentTime, setCurrentTime] = useState(0)
+  const sortedItems = useMemo(() => [...items].sort((a, b) => a.timestamp - b.timestamp), [items])
+  const activeItemId = useMemo(() => {
+    for (let index = sortedItems.length - 1; index >= 0; index -= 1) {
+      if (currentTime >= sortedItems[index].timestamp) return sortedItems[index].id
+    }
+    return sortedItems[0]?.id ?? null
+  }, [currentTime, sortedItems])
+
+  useEffect(() => {
+    const videoElement = videoRef.current
+    if (!videoElement) return
+    const syncTime = () => setCurrentTime(videoElement.currentTime)
+    syncTime()
+    videoElement.addEventListener('timeupdate', syncTime)
+    videoElement.addEventListener('seeked', syncTime)
+    videoElement.addEventListener('loadedmetadata', syncTime)
+    return () => {
+      videoElement.removeEventListener('timeupdate', syncTime)
+      videoElement.removeEventListener('seeked', syncTime)
+      videoElement.removeEventListener('loadedmetadata', syncTime)
+    }
+  }, [videoRef])
+
+  const handleSeek = (timestamp: number) => {
+    const videoElement = videoRef.current
+    if (!videoElement) return
+    videoElement.currentTime = timestamp
+    videoElement.focus()
+  }
+
+  const formatTimestamp = (seconds: number) => `${Math.floor(Math.max(0, seconds) / 60)}:${(Math.floor(Math.max(0, seconds)) % 60).toString().padStart(2, '0')}`
+  const severityStyles = { low: 'bg-emerald-400/15 text-emerald-300 ring-emerald-400/30', medium: 'bg-amber-400/15 text-amber-300 ring-amber-400/30', high: 'bg-rose-400/15 text-rose-300 ring-rose-400/30' } as const
+
+  return (
+    <div className="space-y-3 rounded-3xl border border-white/10 bg-white/5 p-4">
+      <div className="flex items-center justify-between">
+        <h4 className="text-sm font-semibold text-white">{title}</h4>
+        <span className="text-xs uppercase tracking-[0.2em] text-slate-400">현재 {formatTimestamp(currentTime)}</span>
+      </div>
+      <div className="space-y-2">
+        {sortedItems.map((item) => {
+          const isActive = item.id === activeItemId
+          return (
+            <button key={item.id} type="button" onClick={() => handleSeek(item.timestamp)} className={`w-full rounded-2xl border px-3 py-3 text-left transition ${isActive ? 'border-brand-500/30 bg-brand-500/10' : 'border-white/10 bg-slate-900/40 hover:border-white/20 hover:bg-white/5'}`}>
+              <div className="flex items-center justify-between gap-3">
+                <span className="font-mono text-sm font-semibold text-brand-300">{formatTimestamp(item.timestamp)}</span>
+                <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ring-1 ring-inset ${severityStyles[item.severity]}`}>{item.severity}</span>
+              </div>
+              <p className="mt-2 text-sm leading-6 text-slate-300">{item.message}</p>
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+function AiProcessingLoadingScreen({ status, progress, stages, friendlyMessages }: { status: 'uploading' | 'processing' | 'completed'; progress: number; stages: { id: string; label: string }[]; friendlyMessages: string[] }) {
+  const [messageIndex, setMessageIndex] = useState(0)
+  const normalizedProgress = Math.max(0, Math.min(100, Math.round(progress)))
+  const displayProgress = status === 'processing' && normalizedProgress >= 100 ? 95 : normalizedProgress
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setMessageIndex((current) => (current + 1) % Math.max(friendlyMessages.length, 1)), 2600)
+    return () => window.clearInterval(timer)
+  }, [friendlyMessages.length])
+
+  const currentStageIndex = useMemo(() => {
+    if (status === 'completed') return stages.length - 1
+    if (status === 'processing') return Math.max(stages.length - 2, 0)
+    return displayProgress >= 70 ? Math.min(1, stages.length - 1) : 0
+  }, [displayProgress, stages.length, status])
+
+  const message = friendlyMessages[messageIndex] ?? 'AI가 발표를 분석하고 있습니다...'
+
+  return (
+    <div className="space-y-4 rounded-3xl border border-brand-400/25 bg-gradient-to-br from-brand-500/10 to-slate-900/70 p-5">
+      <div className="flex items-center justify-between gap-4">
+        <p className="text-xs uppercase tracking-[0.25em] text-brand-300">AI 처리 진행 중</p>
+        <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">{displayProgress}%</span>
+      </div>
+      <div className="h-2.5 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full bg-gradient-to-r from-brand-400 to-brand-500 transition-all duration-500" style={{ width: `${displayProgress}%` }} /></div>
+      <div className="rounded-2xl border border-white/10 bg-slate-950/50 p-3 text-sm text-slate-200">{message}</div>
+      <div className="space-y-2">
+        {stages.map((stage, index) => {
+          const isCompleted = index < currentStageIndex
+          const isActive = index === currentStageIndex
+          return (
+            <div key={stage.id} className="flex items-center gap-3 rounded-2xl bg-white/5 px-3 py-2">
+              <span className={`h-2.5 w-2.5 rounded-full ${isCompleted ? 'bg-emerald-400' : isActive ? 'animate-pulse bg-brand-300' : 'bg-slate-600'}`} />
+              <span className={`text-sm ${isCompleted || isActive ? 'text-slate-100' : 'text-slate-400'}`}>{stage.label}</span>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
 
 const formatFileSize = (bytes: number) => {
   if (bytes < 1024 * 1024) {
@@ -302,20 +444,14 @@ export function UploadTrainingPage() {
 
         <div className="rounded-3xl border border-white/10 bg-white/5 p-4">
           <p className="text-xs uppercase tracking-[0.25em] text-slate-400">분석 완료 후 이동</p>
-          <div className="mt-3 flex flex-wrap gap-2">
-            <Button
-              variant={nextStep === 'analysis' ? 'primary' : 'secondary'}
-              onClick={() => setNextStep('analysis')}
-            >
-              분석 페이지로 이동
-            </Button>
-            <Button
-              variant={nextStep === 'qa' ? 'primary' : 'secondary'}
-              onClick={() => setNextStep('qa')}
-            >
-              AI Q&A 세션으로 이동
-            </Button>
-          </div>
+          <select
+            value={nextStep}
+            onChange={(event) => setNextStep(event.target.value as 'analysis' | 'qa')}
+            className="mt-3 w-full rounded-2xl border border-white/10 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none"
+          >
+            <option value="analysis">분석 페이지</option>
+            <option value="qa">AI Q&A 세션</option>
+          </select>
         </div>
 
         {videoFile || pptVideoFile ? (
@@ -380,7 +516,7 @@ export function UploadTrainingPage() {
         ) : null}
 
         {!localError && status === 'error' ? (
-          <ErrorRecovery
+          <UploadErrorRecovery
             error={errorMessage ? new Error(errorMessage) : undefined}
             sessionId={sessionId}
             onRetry={() => {
@@ -397,7 +533,7 @@ export function UploadTrainingPage() {
 
         <div className="flex flex-wrap gap-3">
           <Button onClick={handleStartUpload} disabled={!canStartWorkflow || isUploading}>
-            {isUploading ? '업로드 중...' : '분석 시작'}
+            {isUploading ? '업로드 중...' : nextStep === 'qa' ? '분석 시작 후 Q&A로 이동' : '분석 시작'}
           </Button>
           <Button
             variant="ghost"
