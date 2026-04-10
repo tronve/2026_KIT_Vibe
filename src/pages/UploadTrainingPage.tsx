@@ -236,6 +236,8 @@ const statusLabels: Record<string, string> = {
 export function UploadTrainingPage() {
   const navigate = useNavigate()
   const videoRef = useRef<HTMLVideoElement | null>(null)
+  const toastTimerRef = useRef<number | null>(null)
+  const [toastMessage, setToastMessage] = useState<string | null>(null)
   const [videoFile, setVideoFile] = useState<File | null>(null)
   const [pptVideoFile, setPptVideoFile] = useState<File | null>(null)
   const [nextStep, setNextStep] = useState<'analysis' | 'qa'>('analysis')
@@ -280,6 +282,18 @@ export function UploadTrainingPage() {
     }
   }, [isUploading, status, setAiStatus, clearAiStatus])
 
+  const showSelectionToast = useCallback((message: string) => {
+    setToastMessage(message)
+
+    if (toastTimerRef.current !== null) {
+      window.clearTimeout(toastTimerRef.current)
+    }
+
+    toastTimerRef.current = window.setTimeout(() => {
+      setToastMessage(null)
+    }, 1800)
+  }, [])
+
   const onDrop = useCallback(
     (acceptedFiles: File[], rejectedFiles: FileRejection[]) => {
       if (rejectedFiles.length > 0) {
@@ -294,8 +308,9 @@ export function UploadTrainingPage() {
 
       setLocalError(null)
       setVideoFile(nextFile)
+      showSelectionToast(`발표 영상 선택됨: ${nextFile.name}`)
     },
-    [],
+    [showSelectionToast],
   )
 
   const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
@@ -312,7 +327,10 @@ export function UploadTrainingPage() {
   const handlePptVideoFileChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
     const nextFile = event.target.files?.[0] ?? null
     setPptVideoFile(nextFile)
-  }, [])
+    if (nextFile) {
+      showSelectionToast(`PPT 녹화 영상 선택됨: ${nextFile.name}`)
+    }
+  }, [showSelectionToast])
 
   const validateSources = useCallback(() => {
     if (!videoFile && !pptVideoFile) {
@@ -400,180 +418,199 @@ export function UploadTrainingPage() {
     }
   }, [previewUrl])
 
+  useEffect(() => {
+    return () => {
+      if (toastTimerRef.current !== null) {
+        window.clearTimeout(toastTimerRef.current)
+      }
+    }
+  }, [])
+
   return (
-    <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
-      <Card className="space-y-6">
-        <div>
-          <p className="text-xs uppercase tracking-[0.3em] text-brand-600">발표 업로드</p>
-          <h2 className="mt-2 text-3xl font-black text-brand-900">분석할 영상을 선택하세요</h2>
-        </div>
+    <>
+      <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
+        <Card className="space-y-6">
+          <div>
+            <p className="text-xs uppercase tracking-[0.3em] text-brand-600">발표 업로드</p>
+            <h2 className="mt-2 text-3xl font-black text-brand-900">분석할 영상을 선택하세요</h2>
+          </div>
 
-        <div
-          {...getRootProps()}
-          className={`rounded-lg border-2 border-dashed p-8 transition ${
-            isDragActive
-              ? 'border-brand-600 bg-brand-100 shadow-glow'
-              : 'border-brand-300 bg-gradient-to-br from-brand-50 to-transparent'
-          }`}
-        >
-          <input {...getInputProps()} />
-          <div className="space-y-3 text-center">
-            <p className="text-lg font-semibold text-brand-900">여기에 발표 영상을 드래그하세요</p>
-            <p className="text-sm text-brand-600">지원 형식: .mp4, .mov</p>
-            <div className="pt-2">
-              <Button variant="secondary" onClick={open}>
-                영상 선택
-              </Button>
+          {videoFile || pptVideoFile ? (
+            <div className="rounded-lg border border-brand-200 bg-brand-50 p-4">
+              <p className="text-xs uppercase tracking-[0.25em] text-brand-600">선택된 소스</p>
+              {videoFile ? <p className="mt-2 text-sm text-brand-700">발표 영상: {videoFile.name} ({formatFileSize(videoFile.size)})</p> : null}
+              {pptVideoFile ? <p className="mt-2 text-sm text-brand-700">PPT 녹화 영상: {pptVideoFile.name} ({formatFileSize(pptVideoFile.size)})</p> : null}
             </div>
-          </div>
-        </div>
+          ) : null}
 
-        <div className="grid gap-4 md:grid-cols-2">
-          <div className="rounded-lg border border-brand-200 bg-brand-50 p-4">
-            <p className="text-xs uppercase tracking-[0.25em] text-brand-600">선택 업로드: PPT 화면 녹화 영상</p>
-            <p className="mt-2 text-sm text-brand-700">`.mp4` 또는 `.mov`</p>
-            <input
-              type="file"
-              accept="video/mp4,video/quicktime,.mp4,.mov"
-              onChange={handlePptVideoFileChange}
-              className="mt-3 block w-full cursor-pointer text-sm text-brand-700 file:mr-3 file:rounded-lg file:border-0 file:bg-brand-600 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-white"
-            />
-            <p className="mt-2 text-xs text-brand-500">{pptVideoFile ? pptVideoFile.name : '선택된 PPT 화면 녹화 영상 없음'}</p>
-          </div>
-        </div>
+          {previewUrl ? (
+            <div className="space-y-4 rounded-lg border border-brand-200 bg-brand-50 p-4">
+              <div>
+                <p className="text-xs uppercase tracking-[0.25em] text-brand-600">영상 미리보기</p>
+                 <p className="mt-1 text-sm text-brand-700">타임라인은 현재 분석 결과를 기반으로 생성됩니다.</p>
+              </div>
 
-        <div className="rounded-lg border border-brand-200 bg-brand-50 p-4">
-          <p className="text-xs uppercase tracking-[0.25em] text-brand-600">분석 완료 후 이동</p>
-          <select
-            value={nextStep}
-            onChange={(event) => setNextStep(event.target.value as 'analysis' | 'qa')}
-            className="mt-3 w-full rounded-lg border border-brand-200 bg-white px-3 py-2 text-sm text-brand-900 outline-none"
+              <video
+                ref={videoRef}
+                src={previewUrl}
+                controls
+                className="w-full rounded-lg border border-brand-200 bg-white"
+              />
+
+              {feedbackItems.length > 0 ? (
+                <VideoFeedbackTimeline videoRef={videoRef} items={feedbackItems} />
+              ) : (
+                <p className="text-sm text-brand-600">분석을 시작하면 피드백 타임라인이 표시됩니다.</p>
+              )}
+            </div>
+          ) : null}
+
+          <div
+            {...getRootProps()}
+            className={`rounded-lg border-2 border-dashed p-8 transition ${
+              isDragActive
+                ? 'border-brand-600 bg-brand-100 shadow-glow'
+                : 'border-brand-300 bg-gradient-to-br from-brand-50 to-transparent'
+            }`}
           >
-            <option value="analysis">분석 페이지</option>
-            <option value="qa">AI Q&A 세션</option>
-          </select>
-        </div>
+            <input {...getInputProps()} />
+            <div className="space-y-3 text-center">
+              <p className="text-lg font-semibold text-brand-900">여기에 발표 영상을 드래그하세요</p>
+              <p className="text-sm text-brand-600">지원 형식: .mp4, .mov</p>
+              <div className="pt-2">
+                <Button variant="secondary" onClick={open}>
+                  영상 선택
+                </Button>
+              </div>
+            </div>
+          </div>
 
-        {videoFile || pptVideoFile ? (
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="rounded-lg border border-brand-200 bg-brand-50 p-4">
+              <p className="text-xs uppercase tracking-[0.25em] text-brand-600">선택 업로드: PPT 화면 녹화 영상</p>
+              <p className="mt-2 text-sm text-brand-700">`.mp4` 또는 `.mov`</p>
+              <input
+                type="file"
+                accept="video/mp4,video/quicktime,.mp4,.mov"
+                onChange={handlePptVideoFileChange}
+                className="mt-3 block w-full cursor-pointer text-sm text-brand-700 file:mr-3 file:rounded-lg file:border-0 file:bg-brand-600 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-white"
+              />
+              <p className="mt-2 text-xs text-brand-500">{pptVideoFile ? pptVideoFile.name : '선택된 PPT 화면 녹화 영상 없음'}</p>
+            </div>
+          </div>
+
           <div className="rounded-lg border border-brand-200 bg-brand-50 p-4">
-            <p className="text-xs uppercase tracking-[0.25em] text-brand-600">선택된 소스</p>
-            {videoFile ? <p className="mt-2 text-sm text-brand-700">발표 영상: {videoFile.name} ({formatFileSize(videoFile.size)})</p> : null}
-            {pptVideoFile ? <p className="mt-2 text-sm text-brand-700">PPT 녹화 영상: {pptVideoFile.name} ({formatFileSize(pptVideoFile.size)})</p> : null}
+            <p className="text-xs uppercase tracking-[0.25em] text-brand-600">분석 완료 후 이동</p>
+            <select
+              value={nextStep}
+              onChange={(event) => setNextStep(event.target.value as 'analysis' | 'qa')}
+              className="mt-3 w-full rounded-lg border border-brand-200 bg-white px-3 py-2 text-sm text-brand-900 outline-none"
+            >
+              <option value="analysis">분석 페이지</option>
+              <option value="qa">AI Q&A 세션</option>
+            </select>
           </div>
-        ) : null}
 
-        {previewUrl ? (
-          <div className="space-y-4 rounded-lg border border-brand-200 bg-brand-50 p-4">
-            <div>
-              <p className="text-xs uppercase tracking-[0.25em] text-brand-600">영상 미리보기</p>
-               <p className="mt-1 text-sm text-brand-700">타임라인은 현재 분석 결과를 기반으로 생성됩니다.</p>
-            </div>
-
-            <video
-              ref={videoRef}
-              src={previewUrl}
-              controls
-              className="w-full rounded-lg border border-brand-200 bg-white"
-            />
-
-            {feedbackItems.length > 0 ? (
-              <VideoFeedbackTimeline videoRef={videoRef} items={feedbackItems} />
-            ) : (
-              <p className="text-sm text-brand-600">분석을 시작하면 피드백 타임라인이 표시됩니다.</p>
-            )}
-          </div>
-        ) : null}
-
-        {status === 'uploading' ? (
-          <div className="space-y-4">
-            <AIThinking />
-            <AiProcessingLoadingScreen
-              status="uploading"
-              progress={uploadProgress}
-              stages={analysisStages}
-              friendlyMessages={friendlyMessages}
-            />
-          </div>
-        ) : (
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-xs uppercase tracking-[0.2em] text-brand-600">
-               <span>업로드 진행률</span>
-              <span>{uploadProgress}%</span>
-            </div>
-            <div className="h-2 overflow-hidden rounded-full bg-brand-200">
-              <div
-                className="h-full rounded-full bg-gradient-to-r from-brand-500 to-brand-600 transition-all"
-                style={{ width: `${uploadProgress}%` }}
+          {status === 'uploading' ? (
+            <div className="space-y-4">
+              <AIThinking />
+              <AiProcessingLoadingScreen
+                status="uploading"
+                progress={uploadProgress}
+                stages={analysisStages}
+                friendlyMessages={friendlyMessages}
               />
             </div>
-          </div>
-        )}
+          ) : (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-xs uppercase tracking-[0.2em] text-brand-600">
+                 <span>업로드 진행률</span>
+                <span>{uploadProgress}%</span>
+              </div>
+              <div className="h-2 overflow-hidden rounded-full bg-brand-200">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-brand-500 to-brand-600 transition-all"
+                  style={{ width: `${uploadProgress}%` }}
+                />
+              </div>
+            </div>
+          )}
 
-        {localError ? (
-          <p className="rounded-lg border border-rose-300 bg-rose-50 px-4 py-3 text-sm text-rose-900">
-            {localError}
-          </p>
-        ) : null}
-
-        {!localError && status === 'error' ? (
-          <UploadErrorRecovery
-            error={errorMessage ? new Error(errorMessage) : undefined}
-            sessionId={sessionId}
-            onRetry={() => {
-              void handleRetryUpload()
-            }}
-            onRecoverSession={() => {
-              if (!sessionId) {
-                return
-              }
-              navigate(`/reports?sessionId=${encodeURIComponent(sessionId)}`)
-            }}
-          />
-        ) : null}
-
-        <div className="flex flex-wrap gap-3">
-          <Button onClick={handleStartUpload} disabled={!canStartWorkflow || isUploading}>
-            {isUploading ? '업로드 중...' : nextStep === 'qa' ? '분석 시작 후 Q&A로 이동' : '분석 시작'}
-          </Button>
-          <Button
-            variant="ghost"
-            onClick={() => {
-              reset()
-              setVideoFile(null)
-              setPptVideoFile(null)
-              setLocalError(null)
-            }}
-          >
-            초기화
-          </Button>
-        </div>
-      </Card>
-
-      <Card className="space-y-4">
-        <p className="text-xs uppercase tracking-[0.3em] text-brand-600">AI 분석 상태</p>
-
-        <div className="space-y-3">
-          <div className="rounded-lg border border-brand-200 bg-brand-50 p-4">
-            <p className="text-xs uppercase tracking-[0.2em] text-brand-600">워크플로 상태</p>
-            <p className="mt-2 text-lg font-semibold text-brand-900">{statusLabels[status] ?? status}</p>
-          </div>
-
-          <div className="rounded-lg border border-brand-200 bg-brand-50 p-4">
-            <p className="text-xs uppercase tracking-[0.2em] text-brand-600">세션 ID</p>
-            <p className="mt-2 break-all text-sm font-medium text-brand-700">
-              {sessionId ?? '없음'}
+          {localError ? (
+            <p className="rounded-lg border border-rose-300 bg-rose-50 px-4 py-3 text-sm text-rose-900">
+              {localError}
             </p>
-          </div>
+          ) : null}
 
-          <div className="rounded-lg border border-brand-200 bg-brand-50 p-4">
-            <p className="text-xs uppercase tracking-[0.2em] text-brand-600">분석 요약</p>
-            <p className="mt-2 text-sm text-brand-700">
-              {data?.analysis_result.logic_summary ?? '아직 분석이 시작되지 않았습니다.'}
-            </p>
+          {!localError && status === 'error' ? (
+            <UploadErrorRecovery
+              error={errorMessage ? new Error(errorMessage) : undefined}
+              sessionId={sessionId}
+              onRetry={() => {
+                void handleRetryUpload()
+              }}
+              onRecoverSession={() => {
+                if (!sessionId) {
+                  return
+                }
+                navigate(`/reports?sessionId=${encodeURIComponent(sessionId)}`)
+              }}
+            />
+          ) : null}
+
+          <div className="flex flex-wrap gap-3">
+            <Button onClick={handleStartUpload} disabled={!canStartWorkflow || isUploading}>
+              {isUploading ? '업로드 중...' : nextStep === 'qa' ? '분석 시작 후 Q&A로 이동' : '분석 시작'}
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={() => {
+                reset()
+                setVideoFile(null)
+                setPptVideoFile(null)
+                setLocalError(null)
+                setToastMessage(null)
+              }}
+            >
+              초기화
+            </Button>
+          </div>
+        </Card>
+
+        <Card className="space-y-4">
+          <p className="text-xs uppercase tracking-[0.3em] text-brand-600">AI 분석 상태</p>
+
+          <div className="space-y-3">
+            <div className="rounded-lg border border-brand-200 bg-brand-50 p-4">
+              <p className="text-xs uppercase tracking-[0.2em] text-brand-600">워크플로 상태</p>
+              <p className="mt-2 text-lg font-semibold text-brand-900">{statusLabels[status] ?? status}</p>
+            </div>
+
+            <div className="rounded-lg border border-brand-200 bg-brand-50 p-4">
+              <p className="text-xs uppercase tracking-[0.2em] text-brand-600">세션 ID</p>
+              <p className="mt-2 break-all text-sm font-medium text-brand-700">
+                {sessionId ?? '없음'}
+              </p>
+            </div>
+
+            <div className="rounded-lg border border-brand-200 bg-brand-50 p-4">
+              <p className="text-xs uppercase tracking-[0.2em] text-brand-600">분석 요약</p>
+              <p className="mt-2 text-sm text-brand-700">
+                {data?.analysis_result.logic_summary ?? '아직 분석이 시작되지 않았습니다.'}
+              </p>
+            </div>
+          </div>
+        </Card>
+      </div>
+
+      {toastMessage ? (
+        <div className="pointer-events-none fixed right-6 top-6 z-50">
+          <div className="rounded-lg border border-emerald-300 bg-emerald-50 px-4 py-3 shadow-lg">
+            <p className="text-sm font-semibold text-emerald-900">{toastMessage}</p>
           </div>
         </div>
-      </Card>
-    </div>
+      ) : null}
+    </>
   )
 }
 
