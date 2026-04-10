@@ -4,7 +4,7 @@
 
 - 프론트엔드 브랜치: https://github.com/tronve/2026_KIT_Vibe/tree/frontend
 - 백엔드 브랜치: https://github.com/tronve/2026_KIT_Vibe/tree/backend
-
+- 테스트 비디오 파일: test_vid.zip
 ---
 
 # 목차 (Table of Contents)
